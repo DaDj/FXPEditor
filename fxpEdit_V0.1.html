@@ -109,17 +109,20 @@
         }
 
         .add-btn {
-            opacity: 1; /* Always visible if rendered */
+            opacity: 1;
+            /* Always visible if rendered */
             transition: all 0.2s;
             background: none;
             border: none;
-            color: #4ade80; /* Green-400 */
+            color: #4ade80;
+            /* Green-400 */
             padding: 2px 6px;
             border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 4px; /* Spacing next to trash icon */
+            margin-right: 4px;
+            /* Spacing next to trash icon */
             z-index: 10;
         }
 
@@ -150,8 +153,6 @@
             min-height: 6rem;
             /* Ensures the tile body is visible */
         }
-
-
     </style>
 </head>
 
@@ -162,7 +163,10 @@
         <div class="flex items-center gap-2">
             <span class="font-bold text-lg text-primary"><i class="fas fa-fire-smoke mr-2"></i>GTA SA FXP Editor</span>
             <div class="divider divider-horizontal mx-1"></div>
-
+   <button class="btn btn-sm btn-circle btn-ghost text-info"
+                onclick="document.getElementById('help_modal').showModal()" title="Help / First Steps">
+                <i class="fas fa-question text-lg"></i>
+            </button>
             <div class="dropdown dropdown-hover">
                 <label tabindex="0" class="btn btn-sm btn-ghost"><i class="fas fa-file mr-1"></i> File</label>
                 <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-200 rounded-box w-52">
@@ -283,9 +287,7 @@
             <input type="range" min="0.1" max="1.0" step="0.1" value="1.0" class="range range-xs range-primary w-24"
                 oninput="app.sim.timeScale = parseFloat(this.value)">
 
-            <button class="btn btn-sm btn-circle btn-ghost text-info" onclick="document.getElementById('help_modal').showModal()" title="Help / First Steps">
-                <i class="fas fa-question text-lg"></i>
-            </button>
+        
             <label class="swap swap-rotate btn btn-sm btn-circle btn-ghost">
                 <input type="checkbox" id="theme-toggle" />
                 <i class="swap-on fas fa-sun text-yellow-400"></i>
@@ -309,11 +311,12 @@
         <div class="flex-1 flex flex-col h-full relative">
 
             <div class="flex-1 bg-gray-900 relative group overflow-hidden" id="viewport-container">
-              <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[30%]  text-red-100 text-center text-xs py-1 font-bold pointer-events-none z-20  backdrop-blur-sm shadow-lg">
+                <div
+                    class="absolute top-0 left-1/2 -translate-x-1/2 w-[30%]  text-red-100 text-center text-xs py-1 font-bold pointer-events-none z-20  backdrop-blur-sm shadow-lg">
                     <i class="fas fa-exclamation-triangle mr-2"></i>
-                     Rendering may differ slightly from in-game engine. Always verify final results in GTA.
+                    Rendering may differ slightly from in-game engine. Always verify final results in GTA.
                 </div>
-               
+
                 <canvas id="render-canvas"></canvas>
                 <div class="absolute top-2 left-2 text-white/50 text-xs pointer-events-none bg-black/30 p-1 rounded z-10"
                     id="sim-status">
@@ -323,7 +326,8 @@
                     <div id="debug-info">Particles: 0</div>
                     <div>LMB: Orbit | RMB: Pan | Wheel: Zoom</div>
                 </div>
-                <div class="absolute bottom-2 right-2 text-right pointer-events-none z-10 opacity-50 text-[10px] text-gray-400 select-none flex flex-col gap-0.5">
+                <div
+                    class="absolute bottom-2 right-2 text-right pointer-events-none z-10 opacity-50 text-[10px] text-gray-400 select-none flex flex-col gap-0.5">
                     <span class="font-bold uppercase text-gray-500 mb-1">Editor Limitations</span>
                     <span><i class="fas fa-eye-slash mr-1"></i> FLAT & DIR data not visualized</span>
                     <span><i class="fas fa-bug mr-1"></i> TRAIL rendering is experimental</span>
@@ -382,37 +386,45 @@
     <div id="toast-container" class="toast toast-top toast-end z-50"></div>
 
 
-<dialog id="help_modal" class="modal">
+    <dialog id="help_modal" class="modal">
         <div class="modal-box w-11/12 max-w-4xl">
             <div class="flex justify-between items-center mb-4 border-b border-base-content/10 pb-2">
-                <h3 class="font-bold text-2xl text-primary"><i class="fas fa-graduation-cap mr-2"></i> First Steps Guide</h3>
+                <h3 class="font-bold text-2xl text-primary"><i class="fas fa-graduation-cap mr-2"></i> First Steps Guide
+                </h3>
                 <form method="dialog">
                     <button class="btn btn-sm btn-circle btn-ghost">✕</button>
                 </form>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-                
+
                 <div class="space-y-4">
                     <div class="card bg-base-200 shadow-sm border border-base-content/5">
                         <div class="card-body p-4">
-                            <h4 class="card-title text-base text-accent"><i class="fas fa-folder-open"></i> 1. Loading & Saving</h4>
+                            <h4 class="card-title text-base text-accent"><i class="fas fa-folder-open"></i> 1. Loading &
+                                Saving</h4>
                             <ul class="list-disc list-inside opacity-80 space-y-1">
                                 <li><strong>Open FXP:</strong> Load an existing GTA <code>.fxp</code> file.</li>
-                                <li><strong>Load Textures:</strong> Click "Load Textures" and select a <strong>folder</strong> containing your .png images. The editor will match them by name.</li>
-                                <li><strong>Clipboard:</strong> Use "Copy to Clipboard" to quickly paste data into a text editor.</li>
+                                <li><strong>Load Textures:</strong> Click "Load Textures" and select a
+                                    <strong>folder</strong> containing your .png images. The editor will match them by
+                                    name.</li>
+                                <li><strong>Clipboard:</strong> Use "Copy to Clipboard" to quickly paste data into a
+                                    text editor.</li>
                             </ul>
                         </div>
                     </div>
 
                     <div class="card bg-base-200 shadow-sm border border-base-content/5">
                         <div class="card-body p-4">
-                            <h4 class="card-title text-base text-accent"><i class="fas fa-sitemap"></i> 2. The Hierarchy</h4>
+                            <h4 class="card-title text-base text-accent"><i class="fas fa-sitemap"></i> 2. The Hierarchy
+                            </h4>
                             <ul class="list-disc list-inside opacity-80 space-y-1">
                                 <li><strong>System:</strong> The root container (e.g., "Explosion").</li>
-                                <li><strong>Emitter:</strong> The actual source of particles (e.g., "Debris", "Smoke").</li>
+                                <li><strong>Emitter:</strong> The actual source of particles (e.g., "Debris", "Smoke").
+                                </li>
                                 <li><strong>FX Info:</strong> Data blocks defining behavior (Speed, Color, Life).</li>
-                                <li><span class="text-success font-bold">+</span> <strong>Button:</strong> Hover over a selected item in the tree to add new Emitters or Info blocks.</li>
+                                <li><span class="text-success font-bold">+</span> <strong>Button:</strong> Hover over a
+                                    selected item in the tree to add new Emitters or Info blocks.</li>
                             </ul>
                         </div>
                     </div>
@@ -421,22 +433,29 @@
                 <div class="space-y-4">
                     <div class="card bg-base-200 shadow-sm border border-base-content/5">
                         <div class="card-body p-4">
-                            <h4 class="card-title text-base text-accent"><i class="fas fa-sliders-h"></i> 3. Editing Properties</h4>
+                            <h4 class="card-title text-base text-accent"><i class="fas fa-sliders-h"></i> 3. Editing
+                                Properties</h4>
                             <ul class="list-disc list-inside opacity-80 space-y-1">
                                 <li>Select an item in the tree to see its properties below the viewport.</li>
-                                <li><strong>Timelines:</strong> Many properties (Color, Size) change over time. Click <strong>+</strong> to add keyframes.</li>
-                                <li><strong>Blend Modes:</strong> Use the dropdowns on the Emitter to change blending (e.g., "Additive" for fire, "Alpha" for smoke).</li>
+                                <li><strong>Timelines:</strong> Many properties (Color, Size) change over time. Click
+                                    <strong>+</strong> to add keyframes.</li>
+                                <li><strong>Blend Modes:</strong> Use the dropdowns on the Emitter to change blending
+                                    (e.g., "Additive" for fire, "Alpha" for smoke).</li>
                             </ul>
                         </div>
                     </div>
 
                     <div class="card bg-base-200 shadow-sm border border-base-content/5">
                         <div class="card-body p-4">
-                            <h4 class="card-title text-base text-accent"><i class="fas fa-camera"></i> 4. Viewport Controls</h4>
+                            <h4 class="card-title text-base text-accent"><i class="fas fa-camera"></i> 4. Viewport
+                                Controls</h4>
                             <div class="grid grid-cols-2 gap-2 mt-2">
-                                <div class="badge badge-neutral w-full">LMB + Drag</div> <span class="opacity-70">Orbit Camera</span>
-                                <div class="badge badge-neutral w-full">RMB + Drag</div> <span class="opacity-70">Pan Camera</span>
-                                <div class="badge badge-neutral w-full">Scroll</div> <span class="opacity-70">Zoom</span>
+                                <div class="badge badge-neutral w-full">LMB + Drag</div> <span class="opacity-70">Orbit
+                                    Camera</span>
+                                <div class="badge badge-neutral w-full">RMB + Drag</div> <span class="opacity-70">Pan
+                                    Camera</span>
+                                <div class="badge badge-neutral w-full">Scroll</div> <span
+                                    class="opacity-70">Zoom</span>
                             </div>
                         </div>
                     </div>
@@ -445,9 +464,10 @@
             </div>
 
             <div class="mt-6 pt-4 border-t border-base-content/10 text-xs opacity-50 text-center">
-                <i class="fas fa-exclamation-triangle text-warning"></i> Warning: WebGL rendering is an approximation. Always verify final visuals in-game.
+                <i class="fas fa-exclamation-triangle text-warning"></i> Warning: WebGL rendering is an approximation.
+                Always verify final visuals in-game.
             </div>
-            
+
             <div class="modal-action">
                 <form method="dialog">
                     <button class="btn btn-primary">Got it!</button>
@@ -1224,133 +1244,108 @@
 
                 this.reset();
 
-                // --- CLEAR OLD MESHES AND MATERIALS (ES5 compatible iteration) ---
-                for (var textureName in this.textureMeshes) {
-                    if (this.textureMeshes.hasOwnProperty(textureName)) {
-                        var group = this.textureMeshes[textureName];
+                // --- CLEAR OLD MESHES ---
+                for (var id in this.textureMeshes) {
+                    if (this.textureMeshes.hasOwnProperty(id)) {
+                        var group = this.textureMeshes[id];
                         this.scene.remove(group.mesh);
                         group.material.dispose();
                         group.geometry.dispose();
                     }
                 }
-                this.textureMeshes = {}; // Reset the POINTS map
+                this.textureMeshes = {};
 
-                // --- CLEAR OLD TRAIL MESHES (NEW) ---
-                for (var textureName in this.trailMeshes) {
-                    if (this.trailMeshes.hasOwnProperty(textureName)) {
-                        var group = this.trailMeshes[textureName];
+                // --- CLEAR OLD TRAIL MESHES ---
+                for (var id in this.trailMeshes) {
+                    if (this.trailMeshes.hasOwnProperty(id)) {
+                        var group = this.trailMeshes[id];
                         this.scene.remove(group.mesh);
                         group.material.dispose();
                         group.geometry.dispose();
                     }
                 }
-                this.trailMeshes = {}; // Reset the TRAIL map
-
+                this.trailMeshes = {};
 
                 if (sys) {
                     if (!sys.emitters) sys.emitters = [];
                     // Ensure emittersState is fully recreated for the new system
                     this.emittersState = sys.emitters.map(function (e) { return { timer: 0, time: 0, emittedSingle: false }; });
 
-                    // --- COLLECT UNIQUE TEXTURES ---
-                    var uniqueTextures = {};
-                    sys.emitters.forEach(function (e) { uniqueTextures[(e.texture || 'null').toLowerCase()] = true; });
-                    uniqueTextures = Object.keys(uniqueTextures);
+                    // --- NEW: Global Render Order Counter ---
+                    // Starts at 0, increments for every mesh to force specific draw order
+                    let currentRenderOrder = 0;
 
+                    // --- NEW: Loop strictly through Emitters ---
+                    sys.emitters.forEach(function (em) {
+                        const textureName = (em.texture || 'null').toLowerCase();
+                        const hasTrail = em.infos.some(function (i) { return i.type === 'FX_INFO_TRAIL_DATA'; });
 
-                    uniqueTextures.forEach(function (textureName) {
-                        const texture = this.textures[textureName] || this.defaultTexture;
-                        const firstEmitter = sys.emitters.find(function (e) { return (e.texture || 'null').toLowerCase() === textureName; });
-                        const hasTrail = firstEmitter.infos.some(function (i) { return i.type === 'FX_INFO_TRAIL_DATA'; });
+                        // Load textures for this specific emitter
+                        const tex1 = this.textures[textureName] || this.defaultTexture;
+                        const tex2 = this.textures[(em.texture2 || 'null').toLowerCase()] || this.defaultTexture;
+                        const tex3 = this.textures[(em.texture3 || 'null').toLowerCase()] || this.defaultTexture;
+                        const tex4 = this.textures[(em.texture4 || 'null').toLowerCase()] || this.defaultTexture;
 
                         // --- Points Mesh Setup ---
                         var pointMaterial = this.baseShaderMaterial.clone();
-                        pointMaterial.uniforms.tex1.value = this.textures[firstEmitter.texture.toLowerCase()] || this.defaultTexture;
-                        pointMaterial.uniforms.tex2.value = this.textures[(firstEmitter.texture2 || 'null').toLowerCase()] || this.defaultTexture;
-                        pointMaterial.uniforms.tex3.value = this.textures[(firstEmitter.texture3 || 'null').toLowerCase()] || this.defaultTexture;
-                        pointMaterial.uniforms.tex4.value = this.textures[(firstEmitter.texture4 || 'null').toLowerCase()] || this.defaultTexture;
+                        pointMaterial.uniforms.tex1.value = tex1;
+                        pointMaterial.uniforms.tex2.value = tex2;
+                        pointMaterial.uniforms.tex3.value = tex3;
+                        pointMaterial.uniforms.tex4.value = tex4;
 
-                        // Apply Blending (same logic for both points and trails based on first emitter)
-                        if (firstEmitter) {
-                            // --- Apply GTA Blend Modes ---
-                            const src = firstEmitter.srcBlend || 4; // Default to SrcAlpha
-                            const dst = firstEmitter.dstBlend || 5; // Default to InvSrcAlpha
+                        // Apply Blending
+                        const src = em.srcBlend || 4;
+                        const dst = em.dstBlend || 5;
 
-                            const blendMap = {
-                                1: THREE.OneFactor,               // ONE (Additive)
-                                2: THREE.ZeroFactor,              // ZERO
-                                3: THREE.SrcColorFactor,          // SRCCOLOR
-                                4: THREE.SrcAlphaFactor,          // SRCALPHA
-                                5: THREE.OneMinusSrcAlphaFactor,  // INVSRCALPHA
-                                6: THREE.OneMinusSrcColorFactor   // INVSRCCOLOR
-                            };
+                        const blendMap = {
+                            1: THREE.OneFactor, 2: THREE.ZeroFactor, 3: THREE.SrcColorFactor,
+                            4: THREE.SrcAlphaFactor, 5: THREE.OneMinusSrcAlphaFactor, 6: THREE.OneMinusSrcColorFactor
+                        };
 
-                            // Use CustomBlending to support all D3D combos
-                            pointMaterial.blending = THREE.CustomBlending;
-                            pointMaterial.blendEquation = THREE.AddEquation;
-                            pointMaterial.srcFactor = blendMap[src] || THREE.SrcAlphaFactor;
-                            pointMaterial.dstFactor = blendMap[dst] || THREE.OneMinusSrcAlphaFactor;
-
-                            pointMaterial.needsUpdate = true;
-                            pointMaterial.transparent = true;
-                            pointMaterial.depthWrite = false; // Standard for particles
-                        }
+                        pointMaterial.blending = THREE.CustomBlending;
+                        pointMaterial.blendEquation = THREE.AddEquation;
+                        pointMaterial.srcFactor = blendMap[src] || THREE.SrcAlphaFactor;
+                        pointMaterial.dstFactor = blendMap[dst] || THREE.OneMinusSrcAlphaFactor;
+                        pointMaterial.needsUpdate = true;
+                        pointMaterial.transparent = true;
+                        pointMaterial.depthWrite = false;
 
                         // Create and add Points Mesh
                         const pointGeometry = this.createParticleGeometry(this.maxParticles);
                         const pointMesh = new THREE.Points(pointGeometry, pointMaterial);
                         pointMesh.frustumCulled = false;
-                        pointMesh.renderOrder = 1;
-
-                        this.textureMeshes[textureName] = {
-                            mesh: pointMesh, geometry: pointGeometry, material: pointMaterial, particles: []
-                        };
-                        this.scene.add(pointMesh);
 
                         // --- Trail Mesh Setup (NEW) ---
                         if (hasTrail) {
                             var trailMaterial = this.baseTrailMaterial.clone();
-                            trailMaterial.uniforms.tex.value = texture;
+                            trailMaterial.uniforms.tex.value = tex1;
+                            // Match blending
+                            trailMaterial.blending = pointMaterial.blending;
+                            trailMaterial.srcFactor = pointMaterial.srcFactor;
+                            trailMaterial.dstFactor = pointMaterial.dstFactor;
 
-                            // Apply Blending to Trail Mesh
-                            if (firstEmitter) {
-                                // --- Apply GTA Blend Modes ---
-                                const src = firstEmitter.srcBlend || 4; // Default to SrcAlpha
-                                const dst = firstEmitter.dstBlend || 5; // Default to InvSrcAlpha
-
-                                const blendMap = {
-                                    1: THREE.OneFactor,               // ONE (Additive)
-                                    2: THREE.ZeroFactor,              // ZERO
-                                    3: THREE.SrcColorFactor,          // SRCCOLOR
-                                    4: THREE.SrcAlphaFactor,          // SRCALPHA
-                                    5: THREE.OneMinusSrcAlphaFactor,  // INVSRCALPHA
-                                    6: THREE.OneMinusSrcColorFactor   // INVSRCCOLOR
-                                };
-
-                                // Use CustomBlending to support all D3D combos
-                                pointMaterial.blending = THREE.CustomBlending;
-                                pointMaterial.blendEquation = THREE.AddEquation;
-                                pointMaterial.srcFactor = blendMap[src] || THREE.SrcAlphaFactor;
-                                pointMaterial.dstFactor = blendMap[dst] || THREE.OneMinusSrcAlphaFactor;
-
-                                pointMaterial.needsUpdate = true;
-                                pointMaterial.transparent = true;
-                                pointMaterial.depthWrite = false; // Standard for particles
-                            }
-
-                            // Create and add Trail Mesh
                             const trailGeometry = this.createTrailGeometry(this.maxParticles, this.maxTrailSegments);
                             const trailMesh = new THREE.Mesh(trailGeometry, trailMaterial);
                             trailMesh.frustumCulled = false;
-                            trailMesh.renderOrder = 0; // Render trails BEFORE points
-                            trailMesh.visible = false;
 
-                            this.trailMeshes[textureName] = {
+                            // ASSIGN ORDER: Trail draws first
+                            trailMesh.renderOrder = currentRenderOrder++;
+
+                            // Key by EMITTER ID, not texture name
+                            this.trailMeshes[em._id] = {
                                 mesh: trailMesh, geometry: trailGeometry, material: trailMaterial, particles: []
                             };
                             this.scene.add(trailMesh);
                         }
 
+                        // ASSIGN ORDER: Points draw second (on top of its own trail)
+                        pointMesh.renderOrder = currentRenderOrder++;
+
+                        // Key by EMITTER ID, not texture name
+                        this.textureMeshes[em._id] = {
+                            mesh: pointMesh, geometry: pointGeometry, material: pointMaterial, particles: []
+                        };
+                        this.scene.add(pointMesh);
 
                     }.bind(this));
                 }
@@ -1799,7 +1794,7 @@
                     var p = this.particlePool[i];
 
                     if (p.active && p.emitterDef.infos.find(function (info) { return info.type === 'FX_INFO_TRAIL_DATA'; })) {
-                        var group = this.trailMeshes[p.textureName];
+                        var group = this.trailMeshes[p.emitterDef._id];
                         if (group) {
                             group.particles.push(p);
                         }
@@ -1830,7 +1825,7 @@
                             if (p.history.length < 1) return;
 
                             // Determine visible length based on TRAILTIME 
-                            var trailTimeValue = this.getKeyValue(trailData.data.TRAILTIME, p.age / p.life)*((1/25)/FPS_STEP);
+                            var trailTimeValue = this.getKeyValue(trailData.data.TRAILTIME, p.age / p.life) * ((1 / 25) / FPS_STEP);
 
 
                             // CRITICAL FIX: Multiplier = MAX(0, TRAILTIME - 1.0). 
@@ -2275,8 +2270,8 @@
 
                     this.updateParticleVisuals(p, norm);
 
-                    // Group particle by its texture
-                    const pointGroup = this.textureMeshes[p.textureName];
+               // Group particle by its Emitter ID (not texture name)
+                    const pointGroup = this.textureMeshes[p.emitterDef._id];
                     if (pointGroup) {
                         pointGroup.particles.push(p);
                     }
@@ -2441,7 +2436,7 @@
                                 // Example: SizeX=1, SizeY=2 -> p.size=2 -> Width=0.5, Height=1.0
                                 const halfWidth = (p.sizeX / p.size) * 0.5;
                                 const halfHeight = (p.sizeY / p.size) * 0.5;
-                                
+
                                 rectAttr[index * 4 + 0] = -halfWidth;  // Left
                                 rectAttr[index * 4 + 1] = halfHeight;  // Top
                                 rectAttr[index * 4 + 2] = halfWidth;   // Right
@@ -2818,7 +2813,7 @@
             },
 
             renderTree: function () {
-           const root = document.getElementById('tree-root');
+                const root = document.getElementById('tree-root');
                 root.innerHTML = '';
 
                 if (!this.data || !this.data.systems) return;
@@ -2844,7 +2839,7 @@
                     }
 
                     const sysChildren = document.createElement('div');
-                    sysChildren.className = 'pl-1'; 
+                    sysChildren.className = 'pl-1';
 
                     if (sys.emitters) {
                         sys.emitters.forEach(function (em) {
@@ -2866,7 +2861,7 @@
                             }
 
                             const emChildren = document.createElement('div');
-                            emChildren.className = 'pl-1'; 
+                            emChildren.className = 'pl-1';
 
                             if (em.infos) {
                                 em.infos.forEach(function (inf) {
@@ -2885,7 +2880,7 @@
                 }.bind(this));
             },
 
-          createRow: function (text, icon, id, isSelected, hasChildren, isExpanded, type, item) {
+            createRow: function (text, icon, id, isSelected, hasChildren, isExpanded, type, item) {
                 const container = document.createElement('div');
 
                 const div = document.createElement('div');
@@ -2915,7 +2910,7 @@
                 actions.className = "flex items-center flex-shrink-0"; // Prevent shrinking
 
                 // --- Add Button (Only if Selected) ---
-                if (isSelected) {
+                if (true) {
                     if (type === 'system') {
                         const addBtn = document.createElement('button');
                         addBtn.className = "add-btn";
@@ -2926,7 +2921,7 @@
                             app.addEmitter(item);
                         });
                         actions.appendChild(addBtn);
-                    } 
+                    }
                     else if (type === 'emitter') {
                         const addBtn = document.createElement('button');
                         addBtn.className = "add-btn";
@@ -2934,7 +2929,7 @@
                         addBtn.title = "Add FX Info Block";
                         addBtn.addEventListener('click', function (e) {
                             e.stopPropagation();
-                            app.renderFxInfoModal(); 
+                            app.renderFxInfoModal();
                             document.getElementById('add_fx_modal').showModal();
                         });
                         actions.appendChild(addBtn);
