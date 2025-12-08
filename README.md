@@ -30,5 +30,3 @@ A simple browser tool to edit **GTA: San Andreas** particle files (`.fxp`). It l
 ## 📝 Planned Features
 * **Single Effect Export:** Save just one System/Effect instead of the whole file.
 * **Copy/Paste:** Ability to copy Systems and Info blocks between emitters.
-* **Gizmos:** Visual handles to move emitters in the 3D view. emitters.
-* **Gizmos:** Visual handles to move emitters in the 3D view.
