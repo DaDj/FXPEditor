@@ -163,7 +163,7 @@
         <div class="flex items-center gap-2">
             <span class="font-bold text-lg text-primary"><i class="fas fa-fire-smoke mr-2"></i>GTA SA FXP Editor</span>
             <div class="divider divider-horizontal mx-1"></div>
-   <button class="btn btn-sm btn-circle btn-ghost text-info"
+            <button class="btn btn-sm btn-circle btn-ghost text-info"
                 onclick="document.getElementById('help_modal').showModal()" title="Help / First Steps">
                 <i class="fas fa-question text-lg"></i>
             </button>
@@ -215,7 +215,7 @@
             <!-- G-Force Toggle Button -->
             <button class="btn btn-sm btn-neutral" onclick="app.sim.toggleGForce()" id="gforce-btn"
                 title="Toggle Gravity (G-Force)">
-                <i class="fas fa-gravity"></i> G
+                G
             </button>
 
             <button class="btn btn-sm btn-primary" id="grid-toggle-btn" onclick="app.sim.toggleGrid()"
@@ -287,7 +287,7 @@
             <input type="range" min="0.1" max="1.0" step="0.1" value="1.0" class="range range-xs range-primary w-24"
                 oninput="app.sim.timeScale = parseFloat(this.value)">
 
-        
+
             <label class="swap swap-rotate btn btn-sm btn-circle btn-ghost">
                 <input type="checkbox" id="theme-toggle" />
                 <i class="swap-on fas fa-sun text-yellow-400"></i>
@@ -312,9 +312,9 @@
 
             <div class="flex-1 bg-gray-900 relative group overflow-hidden" id="viewport-container">
                 <div
-                    class="absolute top-0 left-1/2 -translate-x-1/2 w-[30%]  text-red-100 text-center text-xs py-1 font-bold pointer-events-none z-20  backdrop-blur-sm shadow-lg">
+                    class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[30%]  text-red-100 opacity-50 text-center text-xs py-1 font-bold pointer-events-none z-20  backdrop-blur-sm shadow-lg">
                     <i class="fas fa-exclamation-triangle mr-2"></i>
-                    Rendering may differ slightly from in-game engine. Always verify final results in GTA.
+                    Rendering may differ from in-game. verify results in GTA.
                 </div>
 
                 <canvas id="render-canvas"></canvas>
@@ -407,7 +407,8 @@
                                 <li><strong>Open FXP:</strong> Load an existing GTA <code>.fxp</code> file.</li>
                                 <li><strong>Load Textures:</strong> Click "Load Textures" and select a
                                     <strong>folder</strong> containing your .png images. The editor will match them by
-                                    name.</li>
+                                    name.
+                                </li>
                                 <li><strong>Clipboard:</strong> Use "Copy to Clipboard" to quickly paste data into a
                                     text editor.</li>
                             </ul>
@@ -438,7 +439,8 @@
                             <ul class="list-disc list-inside opacity-80 space-y-1">
                                 <li>Select an item in the tree to see its properties below the viewport.</li>
                                 <li><strong>Timelines:</strong> Many properties (Color, Size) change over time. Click
-                                    <strong>+</strong> to add keyframes.</li>
+                                    <strong>+</strong> to add keyframes.
+                                </li>
                                 <li><strong>Blend Modes:</strong> Use the dropdowns on the Emitter to change blending
                                     (e.g., "Additive" for fire, "Alpha" for smoke).</li>
                             </ul>
@@ -2270,7 +2272,7 @@
 
                     this.updateParticleVisuals(p, norm);
 
-               // Group particle by its Emitter ID (not texture name)
+                    // Group particle by its Emitter ID (not texture name)
                     const pointGroup = this.textureMeshes[p.emitterDef._id];
                     if (pointGroup) {
                         pointGroup.particles.push(p);
@@ -2589,12 +2591,15 @@
             },
 
             // New method to render the tile UI (Modified for Multi-Select)
-            renderFxInfoModal: function () {
+            renderFxInfoModal: function (targetId) {
+                this.contextEmitterId = targetId || this.selectedId
                 const container = document.getElementById('fx_type_tile_container');
                 const confirmBtn = document.getElementById('confirm_add_fx_btn');
                 container.innerHTML = '';
                 this.selectedFxTypes = []; // Reset selection array
                 confirmBtn.disabled = true;
+
+
 
                 FX_INFO_TYPES_MAP.forEach(function (item) {
                     const originalName = item.type.replace('FX_INFO_', '').replace('_DATA', '');
@@ -2603,7 +2608,7 @@
                     tile.dataset.fxType = item.type; // Store type for selection logic
 
                     // Check if this type is already present in the emitter (disable if so)
-                    const found = app.findItem(app.selectedId);
+                    const found = app.findItem(app.contextEmitterId);
                     const isExisting = found && found.type === 'emitter' && found.item.infos.some(function (i) { return i.type === item.type; });
 
                     if (isExisting) {
@@ -2929,7 +2934,7 @@
                         addBtn.title = "Add FX Info Block";
                         addBtn.addEventListener('click', function (e) {
                             e.stopPropagation();
-                            app.renderFxInfoModal();
+                            app.renderFxInfoModal(item._id);
                             document.getElementById('add_fx_modal').showModal();
                         });
                         actions.appendChild(addBtn);
@@ -3145,17 +3150,39 @@
                     pAct.appendChild(btn);
                 }
                 else if (type === 'info') {
-                    // FIX: Replaced Object.entries with ES5 for...in loop
+                    // Separate Data into Statics (Single values) and Timelines (Keys)
+                    const staticProps = {};
+                    let hasTimelines = false;
+
                     for (const key in target.data) {
-                        if (target.data.hasOwnProperty(key)) {
-                            const val = target.data[key];
-                            if (val && typeof val === 'object' && val.keys) {
-                                // Pass the entire info data object for synchronization context
-                                this.addTimeline(pDiv, key, val, target.data);
-                            } else {
-                                this.addInput(pDiv, key, val, function (v) { target.data[key] = parseFloat(v); }, 'number');
-                            }
+                        const val = target.data[key];
+                        if (val && typeof val === 'object' && val.keys) {
+                            hasTimelines = true;
+                        } else {
+                            staticProps[key] = val;
                         }
+                    }
+
+                    // 1. Render Static Properties first (TIMEMODEPRT, etc)
+                    if (Object.keys(staticProps).length > 0) {
+                        const staticGroup = document.createElement('div');
+                        staticGroup.className = "grid grid-cols-2 gap-2 mb-4 p-2 bg-base-200 rounded";
+                        for (const key in staticProps) {
+                            // Create a mini wrapper for label + input
+                            const wrap = document.createElement('div');
+                            this.addInput(wrap, key, staticProps[key], (v) => {
+                                // Logic for float vs int based on key name
+                                if (key === 'TIMEMODEPRT') target.data[key] = parseInt(v);
+                                else target.data[key] = parseFloat(v);
+                            }, 'number');
+                            staticGroup.appendChild(wrap);
+                        }
+                        pDiv.appendChild(staticGroup);
+                    }
+
+                    // 2. Render Unified Timeline Table
+                    if (hasTimelines) {
+                        this.renderUnifiedTable(pDiv, target.data);
                     }
                 }
             },
@@ -3214,105 +3241,204 @@
                 parent.appendChild(d);
             },
 
-            addTimeline: function (parent, key, obj, infoData) {
-                const wrap = document.createElement('div');
-                wrap.className = 'bg-base-200 p-2 rounded mb-2 border border-base-content/10';
-                const self = this;
-                wrap.innerHTML = `
-                    <div class="flex justify-between mb-1"><span class="text-xs font-bold">${key} (Timeline)</span><button class="btn btn-xs btn-ghost add-key-btn">+</button></div>
-                    <div class="grid grid-cols-5 gap-1 text-xs opacity-50 text-center"><span>Time</span><span>Val</span></div>
-                `;
+            // NEW: Scans all properties in an Info block and forces them to share the same time keys
+            unifyInfoData: function (infoData) {
+                const uniqueTimes = new Set();
+                const floatTolerance = 1e-4;
+                const propNames = [];
 
-                // Add key button handler
-                wrap.querySelector('.add-key-btn').onclick = function () {
-                    // Use a time slightly after the last key or 0.0 if empty
-                    const lastTime = obj.keys.length > 0 ? obj.keys[obj.keys.length - 1].time : 0.0;
-                    const newTime = Math.min(1.0, lastTime + 0.1);
-
-                    // Add the key to the current timeline first (temporary value 0)
-                    obj.keys.push({ time: newTime, val: 0 });
-                    obj.keys.sort(function (a, b) { return a.time - b.time; });
-
-                    // Sync this new time point across ALL peer properties in infoData (mode: ADD)
-                    self.syncKeyframe(infoData, newTime, key, 'ADD');
-
-                    self.renderProperties(self.findItem(self.selectedId).item, 'info');
-                    self.save();
-                };
-
-                obj.keys.forEach(function (k, idx) {
-                    const row = document.createElement('div');
-                    row.className = 'grid grid-cols-5 gap-1 mb-1';
-                    row.innerHTML = `
-                        <input class="col-span-2 input input-xs input-bordered key-time" type="number" step="0.05" value="${k.time}">
-                        <input class="col-span-2 input input-xs input-bordered key-val" type="number" step="0.1" value="${k.val}">
-                        <button class="btn btn-xs btn-square btn-ghost text-error delete-key-btn">x</button>
-                    `;
-                    const inputs = row.querySelectorAll('input');
-
-                    // --- Time Input Change Handler ---
-                    inputs[0].onchange = function (e) {
-                        const newTime = parseFloat(e.target.value);
-                        const oldTime = k.time;
-
-                        // Check if time is already taken by a different key (after sorting)
-                        const isDuplicate = obj.keys.some(function (keyframe, index) { return index !== idx && Math.abs(keyframe.time - newTime) < 1e-6; });
-
-                        if (isDuplicate) {
-                            customAlert("Time point already exists.", 'warning');
-                            // Revert input field value to old time
-                            e.target.value = oldTime.toFixed(3);
-                            return;
+                // 1. Collect all unique times from all properties
+                for (const key in infoData) {
+                    if (infoData.hasOwnProperty(key)) {
+                        const prop = infoData[key];
+                        if (prop && typeof prop === 'object' && prop.keys) {
+                            propNames.push(key);
+                            prop.keys.forEach(k => {
+                                // Round to avoid float precision duplicates (e.g. 0.1 vs 0.1000001)
+                                uniqueTimes.add(Math.round(k.time * 10000) / 10000);
+                            });
                         }
+                    }
+                }
 
-                        // Update the key in the current timeline
-                        k.time = newTime;
+                if (propNames.length === 0) return null; // No timelines here
 
-                        // If the new time is significantly different, trigger synchronization (mode: UPDATE)
-                        if (Math.abs(newTime - oldTime) > 1e-6) {
-                            // Sort the current timeline immediately
-                            obj.keys.sort(function (a, b) { return a.time - b.time; });
+                // 2. Sort times
+                const sortedTimes = Array.from(uniqueTimes).sort((a, b) => a - b);
 
-                            // Sync (this handles interpolation/deletion of the old time in peers)
-                            self.syncKeyframe(infoData, newTime, key, 'UPDATE');
+                // Ensure t=0 exists
+                if (sortedTimes.length === 0 || sortedTimes[0] > 0) {
+                    sortedTimes.unshift(0);
+                }
+
+                // 3. Rebuild every property to have exactly these keys
+                propNames.forEach(name => {
+                    const prop = infoData[name];
+                    const oldKeys = prop.keys;
+                    const newKeys = [];
+
+                    sortedTimes.forEach(time => {
+                        // Try to find existing key very close to this time
+                        const existing = oldKeys.find(k => Math.abs(k.time - time) < floatTolerance);
+
+                        if (existing) {
+                            newKeys.push({ time: time, val: existing.val });
+                        } else {
+                            // Interpolate if missing
+                            const val = this.getInterpValue(oldKeys, time);
+                            newKeys.push({ time: time, val: val });
                         }
+                    });
 
-                        self.renderProperties(self.findItem(self.selectedId).item, 'info');
-                        self.save();
-                    };
-
-                    // --- Value Input Change Handler ---
-                    inputs[1].onchange = function (e) {
-                        k.val = parseFloat(e.target.value);
-                        self.save();
-                        // No re-render needed for value change, just save
-                    };
-
-                    // --- Delete Key Button Handler ---
-                    row.querySelector('.delete-key-btn').onclick = function () {
-                        if (obj.keys.length <= 1) {
-                            customAlert("Cannot delete the last keyframe.", 'warning');
-                            return;
-                        }
-
-                        const timeToDelete = k.time;
-
-                        // 1. Delete key from the current timeline
-                        obj.keys.splice(idx, 1);
-
-                        // 2. Sync: Delete this time point across ALL peer properties (mode: DELETE)
-                        // Note: syncKeyframe handles finding the index and removing the time.
-                        self.syncKeyframe(infoData, timeToDelete, key, 'DELETE');
-
-                        self.renderProperties(self.findItem(self.selectedId).item, 'info');
-                        self.save();
-                    };
-
-                    wrap.appendChild(row);
+                    prop.keys = newKeys;
                 });
-                parent.appendChild(wrap);
+
+                return sortedTimes; // Return the master time list
             },
 
+
+            // NEW: Renders the spreadsheet-like UI
+            renderUnifiedTable: function (parent, infoData) {
+                // 1. Sync data first
+                const times = this.unifyInfoData(infoData);
+                if (!times) return; // Should not happen if we checked type
+
+                // Container for the scrollable table
+                const container = document.createElement('div');
+                container.className = "overflow-x-auto bg-base-200 rounded border border-base-content/10 mb-4 shadow-inner custom-scroll";
+
+                const table = document.createElement('table');
+                table.className = "table table-xs table-pin-rows";
+
+                // --- HEADER (Time Values) ---
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+
+                // Corner Cell
+                const corner = document.createElement('th');
+                corner.className = "bg-base-300 z-10 w-24 min-w-[6rem]";
+                corner.innerText = "Property";
+                headerRow.appendChild(corner);
+
+                // Time Columns
+                times.forEach((time, tIdx) => {
+                    const th = document.createElement('th');
+                    th.className = "text-center min-w-[7rem] p-1 bg-base-300 align-middle"; // Increased width slightly
+
+                    // NEW: Flex Row layout (items-center) instead of Column
+                    const div = document.createElement('div');
+                    div.className = "flex items-center justify-center gap-1";
+
+                    // 1. Delete Button (Left) - Only if not first key
+                    if (tIdx > 0) {
+                        const delBtn = document.createElement('button');
+                        delBtn.className = "btn btn-xs btn-square btn-ghost text-error opacity-50 hover:opacity-100";
+                        delBtn.innerHTML = '<i class="fas fa-times text-[10px]"></i>';
+                        delBtn.title = "Delete Key";
+                        delBtn.onclick = () => {
+                            for (const key in infoData) {
+                                if (infoData[key].keys) infoData[key].keys.splice(tIdx, 1);
+                            }
+                            this.save();
+                            this.renderProperties(this.findItem(this.selectedId).item, 'info');
+                        };
+                        div.appendChild(delBtn);
+                    } else {
+                        // Spacer to keep alignment for the first column
+                        const spacer = document.createElement('div');
+                        spacer.className = "w-6 h-6";
+                        div.appendChild(spacer);
+                    }
+
+                    // 2. Time Input (Center)
+                    const tInput = document.createElement('input');
+                    tInput.type = "number";
+                    tInput.step = "0.05";
+                    // Fixed width (w-14) so it fits nicely between buttons
+                    tInput.className = "input input-xs input-ghost text-center font-bold text-accent w-14 p-0 h-6";
+                    tInput.value = time;
+                    tInput.onchange = (e) => {
+                        const newVal = parseFloat(e.target.value);
+                        for (const key in infoData) {
+                            if (infoData[key].keys) infoData[key].keys[tIdx].time = newVal;
+                        }
+                        this.save();
+                        this.renderProperties(this.findItem(this.selectedId).item, 'info');
+                    };
+                    div.appendChild(tInput);
+
+                    // 3. Insert Button (Right)
+                    const addBtn = document.createElement('button');
+                    addBtn.className = "btn btn-xs btn-square btn-ghost text-success opacity-50 hover:opacity-100";
+                    addBtn.title = "Insert Key After";
+                    addBtn.innerHTML = '<i class="fas fa-plus text-[10px]"></i>';
+                    addBtn.onclick = () => {
+                        let nextTime = (tIdx < times.length - 1) ? times[tIdx + 1] : (time + 0.5);
+                        let newTime = (time + nextTime) / 2;
+
+                        for (const key in infoData) {
+                            if (infoData[key].keys) {
+                                const val = this.getInterpValue(infoData[key].keys, newTime);
+                                infoData[key].keys.splice(tIdx + 1, 0, { time: newTime, val: val });
+                            }
+                        }
+                        this.save();
+                        this.renderProperties(this.findItem(this.selectedId).item, 'info');
+                    };
+                    div.appendChild(addBtn);
+
+                    th.appendChild(div);
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+
+                // --- BODY (Values) ---
+                const tbody = document.createElement('tbody');
+
+                for (const key in infoData) {
+                    const prop = infoData[key];
+                    // Skip non-interpolated properties (like TIMEMODEPRT)
+                    if (!prop || !prop.keys) continue;
+
+                    const row = document.createElement('tr');
+
+                    // Label Cell
+                    const label = document.createElement('td');
+                    label.className = "font-bold text-xs bg-base-200 sticky left-0 border-r border-base-content/10";
+                    label.innerText = key;
+                    row.appendChild(label);
+
+                    // Value Cells
+                    prop.keys.forEach((k, idx) => {
+                        const cell = document.createElement('td');
+                        cell.className = "p-1";
+
+                        const vInput = document.createElement('input');
+                        vInput.type = "number";
+                        vInput.step = "0.01"; // Default step
+                        if (Math.abs(k.val) > 10) vInput.step = "1"; // Adapt step for large values
+                        vInput.className = "input input-xs input-bordered w-full text-right focus:input-primary";
+                        vInput.value = k.val; // Don't fix decimal here to allow raw editing
+
+                        vInput.onchange = (e) => {
+                            k.val = parseFloat(e.target.value);
+                            this.save();
+                        };
+
+                        cell.appendChild(vInput);
+                        row.appendChild(cell);
+                    });
+
+                    tbody.appendChild(row);
+                }
+
+                table.appendChild(tbody);
+                container.appendChild(table);
+                parent.appendChild(container);
+            },
+
+       
             addSystem: function () {
                 const sys = FX_DEFAULTS.system();
                 sys.name = 'NewSystem';
@@ -3340,7 +3466,7 @@
 
                 if (typesToAdd.length === 0) return; // Should be disabled, but defensive check
 
-                const found = app.findItem(app.selectedId);
+                const found = app.findItem(this.contextEmitterId);
 
                 // Helper to create a new interpolation block quickly (REQUIRED for most properties)
                 const defaultInterp = function (val = 1, looped = 0) {
