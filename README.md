@@ -15,7 +15,7 @@ A simple browser tool to edit **GTA: San Andreas** particle files (`.fxp`). It l
 * **Easy Export:** Copy the file content to your clipboard or save as `.fxp`.
 
 ## 🚀 How to use
-1.  **Open:** Click **File > Open FXP** and pick your file.
+1.  **Open:** Click **File > Open FXP** and pick your file. .fxs(single PArticle System) is also supported.
 2.  **Textures:** Click **Load Textures** and select the *folder* where your .png images are.
 3.  **Edit:** Click items in the tree (left) and change values in the table (bottom).
     * Use the **+** button on the timeline to add keyframes.
