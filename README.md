@@ -1,6 +1,4 @@
-<img width="1576" height="939" alt="image" src="https://github.com/user-attachments/assets/cd4f6166-1a26-4d46-a98f-ecd93e0a9a73" />
-
-
+<img width="1560" height="866" alt="image" src="https://github.com/user-attachments/assets/d7540926-0b0c-42d1-aa62-9873c167af37" />
 ***
 
 # GTA SA FXP Editor
@@ -30,3 +28,7 @@ A simple browser tool to edit **GTA: San Andreas** particle files (`.fxp`). It l
 ## 📝 Planned Features
 * **Single Effect Export:** Save just one System/Effect instead of the whole file.
 * **Copy/Paste:** Ability to copy Systems and Info blocks between emitters.
+
+
+<img width="1152" height="1051" alt="image" src="https://github.com/user-attachments/assets/d5fa0322-bf41-489f-924d-538423b41c27" />
+<img width="750" height="196" alt="image" src="https://github.com/user-attachments/assets/163356ef-0444-4173-93c6-ebdc5a943c85" />
