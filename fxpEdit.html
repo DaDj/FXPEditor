@@ -12,7 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
-    <script>
+<script>
         tailwind.config = {
             theme: {
                 extend: {
@@ -20,10 +20,51 @@
                         gray: { 750: '#2d3748', 850: '#1a202c', 950: '#171923' }
                     }
                 }
-            }
-        }
+            } }
     </script>
+<style>
+        [data-theme="dark"] {
+            /* Change Primary (Pink) to Blue (#3b82f6) */
+            --p: 217 91% 60%;  /* HSL values for Blue */
+            --pf: 217 91% 50%; /* Darker blue for focus/hover */
+            --pc: 0 0% 100%;   /* White text on primary buttons */
 
+            /* Change Secondary (Purple) to a darker Blue or Accent */
+            --s: 220 14% 96%;
+            --sf: 220 14% 86%;
+            --sc: 220 14% 10%;
+            
+            /* Adjust Range Slider colors if needed */
+            --in: 198 93% 60%; /* Info color */
+            --su: 158 64% 52%; /* Success color */
+            --wa: 43 96% 56%;  /* Warning color */
+            --er: 0 91% 71%;   /* Error color */
+        }
+
+        /* Force Override for specific button states if CSS variables fail */
+        .btn-primary {
+            background-color: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+            color: white !important;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb !important;
+            border-color: #2563eb !important;
+        }
+        
+        /* Fix Range Sliders to use Blue instead of Pink */
+        .range-primary {
+            --range-shdw: #3b82f6;
+        }
+        
+        /* Fix Toggles to use Blue */
+        .toggle-primary:checked,
+        .toggle-primary[checked="true"],
+        .toggle-primary[aria-checked="true"] {
+            --tglbg: #3b82f6; 
+            background-color: #3b82f6 !important;
+        }
+    </style>
     <style>
         .custom-scroll::-webkit-scrollbar {
             width: 8px;
@@ -85,7 +126,7 @@
         }
 
         .delete-btn {
-            opacity: 0.4;
+            opacity: 0.1;
             transition: all 0.2s;
             background: none;
             border: none;
@@ -106,6 +147,7 @@
             background-color: rgba(239, 68, 68, 0.2);
             color: #ef4444;
             transform: scale(1.1);
+             opacity: 1;
         }
 
         .add-btn {
@@ -125,6 +167,24 @@
             /* Spacing next to trash icon */
             z-index: 10;
         }
+
+        .copy-btn {
+            background: none; border: none;
+            color: #60a5fa; /* Blue-400 */
+            padding: 2px 6px; margin-right: 2px;
+            border-radius: 4px; display: flex; align-items: center; justify-content: center;
+            opacity: 0.6; transition: all 0.2s;
+        }
+        .copy-btn:hover { background-color: rgba(96, 165, 250, 0.2); opacity: 1; transform: scale(1.1); }
+
+        .paste-btn {
+            background: none; border: none;
+            color: #fbbf24; /* Amber-400 */
+            padding: 2px 6px; margin-right: 2px;
+            border-radius: 4px; display: flex; align-items: center; justify-content: center;
+            opacity: 0.1; transition: all 0.2s;
+        }
+        .paste-btn:hover { background-color: rgba(251, 191, 36, 0.2); opacity: 1; transform: scale(1.1); }
 
         .add-btn:hover {
             background-color: rgba(74, 222, 128, 0.2);
@@ -153,6 +213,8 @@
             min-height: 6rem;
             /* Ensures the tile body is visible */
         }
+
+       
     </style>
 </head>
 
@@ -186,8 +248,7 @@
                 onchange="handleTextureUpload(this)">
 
             <div class="divider divider-horizontal mx-1"></div>
-            <button class="btn btn-sm btn-success btn-outline" onclick="app.addSystem()"><i class="fas fa-plus"></i> New
-                System</button>
+          
 
             <div class="form-control ml-4">
                 <label class="label cursor-pointer gap-2">
@@ -301,8 +362,8 @@
         <div class="w-96 flex flex-col bg-base-200 border-r border-base-content/10">
             <div class="p-2 bg-base-300 font-bold text-xs uppercase tracking-wider flex justify-between items-center">
                 Hierarchy
-                <button class="btn btn-xs btn-square btn-ghost text-error" onclick="app.deleteSelected()"
-                    title="Delete Selected Item"><i class="fas fa-trash-alt"></i></button>
+                <button class="btn btn-sm btn-success btn-outline" onclick="app.addSystem()"><i class="fas fa-plus"></i> New
+                System</button>
             </div>
             <div id="tree-root" class="flex-1 overflow-y-auto custom-scroll p-2 text-sm select-none">
             </div>
@@ -2506,6 +2567,7 @@
             selectedId: null,
             sim: new Simulator(),
             selectedFxTypes: [], // CHANGED: Now an array for multi-selection
+            clipboard: null, // Stores { type: 'emitter'|'info', data: Object }
 
             // Helper function to find interpolation value for a given time
             // Used internally by syncKeyframe
@@ -2910,12 +2972,44 @@
                 content.innerHTML += `<i class="fas fa-${icon} w-4 mr-2 opacity-70 flex-shrink-0"></i> <span class="truncate">${text}</span>`;
                 div.appendChild(content);
 
-                // 2. RIGHT SIDE: Actions Container (Add + Delete)
+          // --- RIGHT SIDE: ACTIONS ---
                 const actions = document.createElement('div');
-                actions.className = "flex items-center flex-shrink-0"; // Prevent shrinking
+                actions.className = "flex items-center flex-shrink-0"; 
 
-                // --- Add Button (Only if Selected) ---
-                if (true) {
+                // 1. PASTE BUTTON (Condition: Clipboard has data COMPATIBLE with this row)
+                let canPaste = false;
+                if (app.clipboard) {
+                    if (type === 'system' && app.clipboard.type === 'emitter') canPaste = true;
+                    if (type === 'emitter' && app.clipboard.type === 'info') canPaste = true;
+                }
+
+                if (canPaste) {
+                    const pasteBtn = document.createElement('button');
+                    pasteBtn.className = "paste-btn";
+                    pasteBtn.innerHTML = '<i class="fas fa-paste"></i>';
+                    pasteBtn.title = "Paste here";
+                    pasteBtn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        app.pasteItem(id);
+                    });
+                    actions.appendChild(pasteBtn);
+                }
+
+                // 2. COPY BUTTON (Visible on Emitters and Infos)
+                if (type === 'emitter' || type === 'info') {
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = "copy-btn";
+                    copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+                    copyBtn.title = "Copy";
+                    copyBtn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        app.copyItem(id);
+                    });
+                    actions.appendChild(copyBtn);
+                }
+
+                // 3. ADD BUTTON (Only if Selected)
+                if (isSelected) {
                     if (type === 'system') {
                         const addBtn = document.createElement('button');
                         addBtn.className = "add-btn";
@@ -2926,7 +3020,7 @@
                             app.addEmitter(item);
                         });
                         actions.appendChild(addBtn);
-                    }
+                    } 
                     else if (type === 'emitter') {
                         const addBtn = document.createElement('button');
                         addBtn.className = "add-btn";
@@ -2934,14 +3028,15 @@
                         addBtn.title = "Add FX Info Block";
                         addBtn.addEventListener('click', function (e) {
                             e.stopPropagation();
-                            app.renderFxInfoModal(item._id);
+                            // Pass ID to modal
+                            app.renderFxInfoModal(item._id); 
                             document.getElementById('add_fx_modal').showModal();
                         });
                         actions.appendChild(addBtn);
                     }
                 }
 
-                // --- Delete Button ---
+                // 4. DELETE BUTTON
                 const delBtn = document.createElement('button');
                 delBtn.className = "delete-btn";
                 delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
@@ -2953,17 +3048,15 @@
                 });
                 actions.appendChild(delBtn);
 
-                // Add Actions group to the main row
                 div.appendChild(actions);
 
-                // Row Click Event
+                // Row Click
                 div.addEventListener('click', function (e) {
                     e.stopPropagation();
                     app.select(id);
                 });
 
                 container.appendChild(div);
-
                 return { container, iconWrapper };
             },
 
@@ -3187,6 +3280,69 @@
                 }
             },
 
+            // --- COPY / PASTE LOGIC ---
+            copyItem: function(id) {
+                const found = this.findItem(id);
+                if (!found) return;
+
+                // Deep clone the data to prevent reference issues
+                // We strip the _id immediately so we don't accidentally reuse it later
+                const dataClone = JSON.parse(JSON.stringify(found.item));
+                
+                this.clipboard = {
+                    type: found.type, // 'emitter' or 'info'
+                    data: dataClone
+                };
+
+                customAlert(`Copied ${found.type}: ${found.item.name || found.item.type}`, "info");
+                this.renderTree(); // Re-render to show Paste buttons
+            },
+
+            pasteItem: function(targetId) {
+                if (!this.clipboard) return;
+                
+                const found = this.findItem(targetId);
+                if (!found) return;
+
+                const pasteType = this.clipboard.type;
+                const targetType = found.type;
+
+                // 1. Paste Emitter -> Into System
+                if (pasteType === 'emitter' && targetType === 'system') {
+                    const newEm = JSON.parse(JSON.stringify(this.clipboard.data));
+                    
+                    // REGENERATE IDs (Critical!)
+                    newEm._id = uuid();
+                    newEm.infos.forEach(i => i._id = uuid()); // Regenerate IDs for children
+
+                    // Append
+                    found.item.emitters.push(newEm);
+                    this.select(newEm._id); // Select the new item
+                }
+                // 2. Paste Info -> Into Emitter
+                else if (pasteType === 'info' && targetType === 'emitter') {
+                    const newInfo = JSON.parse(JSON.stringify(this.clipboard.data));
+                    
+                    // Check duplicates (Optional: GTA usually only allows one block of each type)
+                    // If strictly enforcing 1 type per emitter, enable this check:
+                    /*
+                    if (found.item.infos.some(i => i.type === newInfo.type)) {
+                        customAlert("This block type already exists here.", "warning");
+                        return;
+                    }
+                    */
+
+                    newInfo._id = uuid(); // Regenerate ID
+                    found.item.infos.push(newInfo);
+                    this.select(newInfo._id);
+                }
+
+                this.save();
+                // Render tree will happen automatically by this.select, but purely for safety:
+                this.renderTree();
+                customAlert("Pasted successfully", "success");
+            },
+
             updateGroundHeight: function (val) {
                 const h = parseFloat(val);
                 this.sim.groundHeight = h;
@@ -3333,7 +3489,7 @@
                     if (tIdx > 0) {
                         const delBtn = document.createElement('button');
                         delBtn.className = "btn btn-xs btn-square btn-ghost text-error opacity-50 hover:opacity-100";
-                        delBtn.innerHTML = '<i class="fas fa-times text-[10px]"></i>';
+                        delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
                         delBtn.title = "Delete Key";
                         delBtn.onclick = () => {
                             for (const key in infoData) {
@@ -3371,7 +3527,7 @@
                     const addBtn = document.createElement('button');
                     addBtn.className = "btn btn-xs btn-square btn-ghost text-success opacity-50 hover:opacity-100";
                     addBtn.title = "Insert Key After";
-                    addBtn.innerHTML = '<i class="fas fa-plus text-[10px]"></i>';
+                    addBtn.innerHTML = '<i class="fas fa-plus "></i>';
                     addBtn.onclick = () => {
                         let nextTime = (tIdx < times.length - 1) ? times[tIdx + 1] : (time + 0.5);
                         let newTime = (time + nextTime) / 2;
