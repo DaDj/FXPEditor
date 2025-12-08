@@ -1,1 +1,39 @@
 <img width="1576" height="939" alt="image" src="https://github.com/user-attachments/assets/cd4f6166-1a26-4d46-a98f-ecd93e0a9a73" />
+GTA SA FXP Editor
+A simple browser tool to edit GTA: San Andreas particle files (.fxp). It lets you tweak effects and see changes instantly without restarting the game every time.
+
+✅ What it does
+Instant Preview: See your particles move and change color in real-time.
+
+Full Editing: Change every property (Speed, Life, Color, Size, etc.) using a timeline table.
+
+Texture Support: Load your local .png images to see the actual textures on the particles.
+
+Fixes Files: Automatically fixes common errors in FXP files (like duplicate LENGTH lines) when saving.
+
+Easy Export: Copy the file content to your clipboard or save as .fxp.
+
+🚀 How to use
+Open: Click File > Open FXP and pick your file.
+
+Textures: Click Load Textures and select the folder where your .png images are.
+
+Edit: Click items in the tree (left) and change values in the table (bottom).
+
+Use the + button on the timeline to add keyframes.
+
+Use the + button in the tree to add new Emitters or Info blocks.
+
+Save: Click File > Save FXP or Copy to Clipboard.
+
+⚠️ Known Issues & Limitations
+Rendering: This is a web preview. It is not 1:1 with the game engine. Always check the final result in GTA.
+
+Visuals: FLAT and DIR (directional) particles do not render correctly yet.
+
+Trails: Ribbon trails are experimental and may look glitchy.
+
+📝 Planned Features
+Single Effect Export: Save just one System/Effect instead of the whole file.
+
+Copy/Paste: Ability to copy Systems and Info blocks between emitters.
