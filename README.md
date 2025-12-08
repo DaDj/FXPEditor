@@ -3,7 +3,7 @@
 
 # GTA SA FXP Editor
 
-A simple browser tool to edit **GTA: San Andreas** particle files (`.fxp`). It lets you tweak effects and see changes instantly without restarting the game every time.
+A  browser tool to edit **GTA: San Andreas** particle files (`.fxp`). It lets you tweak effects and see changes instantly without restarting the game every time.
 
 ## ✅ What it does
 * **Instant Preview:** See your particles move and change color in real-time.
@@ -24,6 +24,7 @@ A simple browser tool to edit **GTA: San Andreas** particle files (`.fxp`). It l
 * **Rendering:** This is a web preview. It is **not** 1:1 with the game engine. Always check the final result in GTA.
 * **Visuals:** `FLAT` and `DIR` (directional) particles do not render correctly yet.
 * **Trails:** Ribbon trails are experimental and may look glitchy.
+* **Heathaze emitters have huge sphere texture. (but arent rendered ingame, only heathaze duuh)
 
 ## 📝 Planned Features
 * **Single Effect Export:** Save just one System/Effect instead of the whole file.
