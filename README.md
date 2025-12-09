@@ -9,7 +9,6 @@ A  browser tool to edit **GTA: San Andreas** particle files (`.fxp`). It lets yo
 * **Instant Preview:** See your particles move and change color in real-time.
 * **Full Editing:** Change every property (Speed, Life, Color, Size, etc.) using a timeline table.
 * **Texture Support:** Load your local `.png` images to see the actual textures on the particles.
-* **Fixes Files:** Automatically fixes common errors in FXP files (like duplicate LENGTH lines) when saving.
 * **Easy Export:** Copy the file content to your clipboard or save as `.fxp`.
 
 ## 🚀 How to use
