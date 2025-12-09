@@ -250,6 +250,50 @@
             min-height: 6rem;
             /* Ensures the tile body is visible */
         }
+
+        .texture-tile {
+            aspect-ratio: 1;
+            background-color: #1f2937;
+            /* Gray-800 */
+            border: 2px solid transparent;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .texture-tile:hover {
+            border-color: #3b82f6;
+            /* Primary Blue */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .texture-tile img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 4px;
+        }
+
+        .texture-tile span {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 0.65rem;
+            text-align: center;
+            padding: 2px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     </style>
 </head>
 
@@ -573,6 +617,22 @@
             <div class="modal-action">
                 <form method="dialog">
                     <button class="btn btn-primary">Got it!</button>
+                </form>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog id="texture_browser_modal" class="modal">
+        <div class="modal-box w-11/12 max-w-5xl">
+            <h3 class="font-bold text-lg mb-4">Select Loaded Texture</h3>
+
+            <div id="texture_browser_grid"
+                class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 max-h-[60vh] overflow-y-auto custom-scroll p-2">
+            </div>
+
+            <div class="modal-action">
+                <form method="dialog">
+                    <button class="btn btn-ghost">Cancel</button>
                 </form>
             </div>
         </div>
@@ -2229,13 +2289,20 @@
                     p.velocity.y += fz_sa * fixedDt; // Vertical force
                     p.velocity.z += fy_sa * fixedDt; // Horizontal depth force
 
-
-                    // --- FRICTION (FX_INFO_FRICTION_DATA) ---
+                 // --- FRICTION (FX_INFO_FRICTION_DATA) ---
                     const frictionData = p.emitterDef.infos.find(function (i) { return i.type === 'FX_INFO_FRICTION_DATA'; });
                     if (frictionData) {
-                        const friction = this.getKeyValue(frictionData.data.MIN, norm);
-                        // Use the rate-independent friction model (assuming friction value is [0, 1])
-                        p.velocity.multiplyScalar(Math.pow(1.0 - friction, fixedDt * 60));
+                        // FIX: Check for 'FRICTION' key first (used by Editor), fallback to 'MIN' (Legacy/Import)
+                        let fKey = frictionData.data.FRICTION;
+                        if (!fKey && frictionData.data.MIN) fKey = frictionData.data.MIN;
+
+                        const friction = this.getKeyValue(fKey, norm);
+                        
+                        // Apply friction
+                        // Only apply if friction > 0 to save math operations
+                        if (friction > 0.001) {
+                            p.velocity.multiplyScalar(Math.pow(friction, fixedDt * 60));
+                        }
                     }
 
                     const jitterData = p.emitterDef.infos.find(function (i) { return i.type === 'FX_INFO_JITTER_DATA'; });
@@ -2360,7 +2427,7 @@
                 }
                 // --- UPDATE TRAIL RENDERER ---
                 if (HasTrail) {
-                        this.updateTrailRenderer();
+                    this.updateTrailRenderer();
                 }
 
 
@@ -2586,6 +2653,9 @@
         var app = {
             data: null,
             selectedId: null,
+            texTargetObj: null,  // The Emitter object being edited
+            texTargetProp: null, // The property string ('texture', 'texture2', etc.)
+
             sim: new Simulator(),
             selectedFxTypes: [], // CHANGED: Now an array for multi-selection
             clipboard: null, // Stores { type: 'emitter'|'info', data: Object }
@@ -3057,6 +3127,32 @@
                     }
                 }
 
+                // --- MOVE BUTTONS (Only for Info items) ---
+                if (type === 'emitter') {
+                    // Move Up
+                    const upBtn = document.createElement('button');
+                    // Reuse copy-btn class for consistent sizing/fading
+                    upBtn.className = "copy-btn text-base-content/50 hover:text-white";
+                    upBtn.innerHTML = '<i class="fas fa-chevron-up text-[10px]"></i>';
+                    upBtn.title = "Move Up";
+                    upBtn.onclick = function (e) {
+                        e.stopPropagation();
+                        app.moveItem(id, -1);
+                    };
+                    actions.appendChild(upBtn);
+
+                    // Move Down
+                    const downBtn = document.createElement('button');
+                    downBtn.className = "copy-btn text-base-content/50 hover:text-white";
+                    downBtn.innerHTML = '<i class="fas fa-chevron-down text-[10px]"></i>';
+                    downBtn.title = "Move Down";
+                    downBtn.onclick = function (e) {
+                        e.stopPropagation();
+                        app.moveItem(id, 1);
+                    };
+                    actions.appendChild(downBtn);
+                }
+
                 // 4. DELETE BUTTON
                 const delBtn = document.createElement('button');
                 delBtn.className = "delete-btn";
@@ -3079,6 +3175,30 @@
 
                 container.appendChild(div);
                 return { container, iconWrapper };
+            },
+
+            moveItem: function (id, direction) {
+                const found = this.findItem(id);
+                // Ensure we found the item and it is an Info block (inside a parent array)
+                if (!found || found.type !== 'emitter' || !Array.isArray(found.parent)) return;
+
+                const list = found.parent;
+                const idx = list.findIndex(function (i) { return i._id === id; });
+                if (idx === -1) return;
+
+                // Calculate swap target index
+                const targetIdx = idx + direction;
+
+                // Bounds Check
+                if (targetIdx >= 0 && targetIdx < list.length) {
+                    // Swap elements using a temp variable
+                    const temp = list[idx];
+                    list[idx] = list[targetIdx];
+                    list[targetIdx] = temp;
+
+                    this.save();
+                    this.renderTree();
+                }
             },
 
             // DELETION BY SEARCH AND DESTROY 
@@ -3227,11 +3347,10 @@
                     this.addInput(pDiv, 'Name', target.name, function (v) { target.name = v; });
                     // Ensure Texture change triggers system update to load new texture
                     // 2. Texture Slots (1-4) [FIX: Added inputs for all slots]
-                    this.addInput(pDiv, 'Texture 1 (Primary)', target.texture, function (v) { target.texture = v; self.sim.setActiveSystem(found.root); });
-                    this.addInput(pDiv, 'Texture 2', target.texture2 || '', function (v) { target.texture2 = v; self.sim.setActiveSystem(found.root); });
-                    this.addInput(pDiv, 'Texture 3', target.texture3 || '', function (v) { target.texture3 = v; self.sim.setActiveSystem(found.root); });
-                    this.addInput(pDiv, 'Texture 4', target.texture4 || '', function (v) { target.texture4 = v; self.sim.setActiveSystem(found.root); });
-
+                   this.addTextureInput(pDiv, 'Texture 1 (Primary)', target, 'texture');
+                    this.addTextureInput(pDiv, 'Texture 2', target, 'texture2');
+                    this.addTextureInput(pDiv, 'Texture 3', target, 'texture3');
+                    this.addTextureInput(pDiv, 'Texture 4', target, 'texture4');
                     this.addInput(pDiv, 'Lod Start', target.lodstart, function (v) { target = parseFloat(v); }, 'number');
                     this.addInput(pDiv, 'Lod End', target.lodend, function (v) { target = parseFloat(v); }, 'number');
 
@@ -3299,6 +3418,104 @@
                         this.renderUnifiedTable(pDiv, target.data);
                     }
                 }
+            },
+
+            openTextureBrowser: function (targetObj, targetProp) {
+                this.texTargetObj = targetObj;
+                this.texTargetProp = targetProp;
+
+                const grid = document.getElementById('texture_browser_grid');
+                grid.innerHTML = '';
+
+                const textureNames = Object.keys(this.sim.textures);
+
+                if (textureNames.length === 0) {
+                    grid.innerHTML = `<div class="col-span-full text-center opacity-50 italic py-10">No textures loaded. Use "Load Textures" in the File menu first.</div>`;
+                }
+
+                textureNames.forEach(function (name) {
+                    const tex = this.sim.textures[name];
+
+                    const tile = document.createElement('div');
+                    tile.className = 'texture-tile';
+                    tile.title = name;
+
+                    // Image Preview
+                    const img = document.createElement('img');
+                    // Check if it's a loaded texture with an image source
+                    if (tex.image && tex.image.src) {
+                        img.src = tex.image.src;
+                    } else {
+                        // Fallback for procedural/canvas textures
+                        img.src = '';
+                        img.alt = 'No Preview';
+                    }
+
+                    // Name Label
+                    const label = document.createElement('span');
+                    label.innerText = name;
+
+                    tile.appendChild(img);
+                    tile.appendChild(label);
+
+                    // Click Handler
+                    tile.onclick = function () {
+                        // 1. Update Data
+                        this.texTargetObj[this.texTargetProp] = name;
+
+                        // 2. Save & Update Simulation
+                        this.save();
+                        // Find root system to refresh the material
+                        const found = this.findItem(this.texTargetObj._id);
+                        if (found) this.sim.setActiveSystem(found.root);
+
+                        // 3. Refresh Property Editor UI (to show new text in input)
+                        this.renderProperties(this.texTargetObj, 'emitter');
+
+                        // 4. Close Modal
+                        document.getElementById('texture_browser_modal').close();
+                    }.bind(this);
+
+                    grid.appendChild(tile);
+                }.bind(this));
+
+                document.getElementById('texture_browser_modal').showModal();
+            },
+
+            // --- NEW: Helper for Property Editor ---
+            addTextureInput: function (parent, label, obj, prop) {
+                const d = document.createElement('div');
+                d.className = 'form-control mb-2';
+                d.innerHTML = `<label class="label py-0 text-xs font-bold opacity-60">${label}</label>`;
+
+                const group = document.createElement('div');
+                group.className = 'join w-full';
+
+                // 1. Text Input (Editable)
+                const inp = document.createElement('input');
+                inp.className = 'input input-sm input-bordered join-item w-full';
+                inp.type = 'text';
+                inp.value = obj[prop] || 'null';
+                inp.onchange = function (e) {
+                    obj[prop] = e.target.value;
+                    this.save();
+                    const found = this.findItem(obj._id);
+                    if (found) this.sim.setActiveSystem(found.root);
+                }.bind(this);
+
+                // 2. Browser Button
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-sm btn-neutral join-item';
+                btn.innerHTML = '<i class="fas fa-folder-open"></i>'; // Folder icon
+                btn.title = "Select Loaded Texture";
+                btn.onclick = function () {
+                    this.openTextureBrowser(obj, prop);
+                }.bind(this);
+
+                group.appendChild(inp);
+                group.appendChild(btn);
+                d.appendChild(group);
+                parent.appendChild(d);
             },
 
             // --- COPY / PASTE LOGIC ---
@@ -3473,7 +3690,6 @@
                 return sortedTimes; // Return the master time list
             },
 
-
             // NEW: Renders the spreadsheet-like UI
             renderUnifiedTable: function (parent, infoData) {
                 // 1. Sync data first
@@ -3614,7 +3830,6 @@
                 container.appendChild(table);
                 parent.appendChild(container);
             },
-
 
             addSystem: function () {
                 const sys = FX_DEFAULTS.system();
@@ -3830,7 +4045,6 @@
                 }
             }
         };
-
 
         // --- Helper Functions (Moved to use global 'app' variable) ---
 
