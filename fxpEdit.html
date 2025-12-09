@@ -6,11 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GTA SA FXP Editor</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+   <!--  <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css" /> -->
+
+    <link rel="stylesheet" href="css/Theme.css">
+    <link rel="stylesheet" href="css/all.min.css">
+    <script src="js/Tailwind.js"></script>
+    <script src="js/three.min.js"></script>
+    <script src="js/OrbitControls.js"></script>
 
 <script>
         tailwind.config = {
@@ -126,7 +129,7 @@
         }
 
         .delete-btn {
-            opacity: 0.1;
+            opacity: 0.2;
             transition: all 0.2s;
             background: none;
             border: none;
@@ -151,7 +154,7 @@
         }
 
         .add-btn {
-            opacity: 1;
+            opacity: 0.2;
             /* Always visible if rendered */
             transition: all 0.2s;
             background: none;
@@ -167,13 +170,14 @@
             /* Spacing next to trash icon */
             z-index: 10;
         }
+          .add-btn:hover  { opacity: 1; }
 
         .copy-btn {
             background: none; border: none;
             color: #60a5fa; /* Blue-400 */
             padding: 2px 6px; margin-right: 2px;
             border-radius: 4px; display: flex; align-items: center; justify-content: center;
-            opacity: 0.6; transition: all 0.2s;
+            opacity: 0.2; transition: all 0.2s;
         }
         .copy-btn:hover { background-color: rgba(96, 165, 250, 0.2); opacity: 1; transform: scale(1.1); }
 
@@ -3009,7 +3013,7 @@
                 }
 
                 // 3. ADD BUTTON (Only if Selected)
-                if (isSelected) {
+                if (true) {
                     if (type === 'system') {
                         const addBtn = document.createElement('button');
                         addBtn.className = "add-btn";
