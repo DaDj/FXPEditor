@@ -256,17 +256,18 @@
 <body class="h-screen w-screen flex flex-col overflow-hidden bg-base-100 text-base-content font-sans">
 
     <div
-        class="navbar bg-base-300 min-h-[3rem] h-12 px-4 border-b border-base-content/10 shadow-md z-10 flex justify-between">
+        class="navbar bg-base-300 min-h-[3rem] h-12 px-4 border-b border-base-content/10 shadow-md z-50 flex justify-between">
         <div class="flex items-center gap-2">
-            <span class="font-bold text-lg text-primary"><i class="fas fa-fire-smoke mr-2"></i>GTA SA FXP Editor</span>
-            <div class="divider divider-horizontal mx-1"></div>
+
+
             <button class="btn btn-sm btn-circle btn-ghost text-info"
                 onclick="document.getElementById('help_modal').showModal()" title="Help / First Steps">
                 <i class="fas fa-question text-lg"></i>
             </button>
+            <div class="divider divider-horizontal mx-1"></div>
             <div class="dropdown dropdown-hover">
                 <label tabindex="0" class="btn btn-sm btn-ghost"><i class="fas fa-file mr-1"></i> File</label>
-                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-200 rounded-box w-52">
+                <ul tabindex="0" class="dropdown-content z-50 menu p-2 shadow bg-base-200 rounded-box w-52">
                     <li><a onclick="app.newProject()"><i class="fas fa-file-circle-plus"></i> New Project</a></li>
                     <li><label for="file-upload"><i class="fas fa-folder-open"></i> Open FXP</label></li>
                     <li><a onclick="saveToFile()"><i class="fas fa-save"></i> Save FXP</a></li>
@@ -284,7 +285,6 @@
 
             <div class="divider divider-horizontal mx-1"></div>
 
-
             <div class="form-control ml-4">
                 <label class="label cursor-pointer gap-2">
                     <span class="label-text text-xs font-bold">Autosave</span>
@@ -292,6 +292,9 @@
                         onchange="toggleAutosave(this)" checked />
                 </label>
             </div>
+
+            <div class="divider divider-horizontal mx-1"></div>
+            <span class="font-bold text-lg text-primary"><i class="fas fa-fire-smoke mr-2"></i>GTA SA FXP Editor</span>
         </div>
 
         <div class="flex items-center gap-2">
@@ -2136,6 +2139,7 @@
 
                 let activeCount = 0;
 
+                let HasTrail = 0;
                 // Loop through the entire particle pool, update physics, and group by texture
                 for (let i = 0; i < this.maxParticles; i++) {
                     const p = this.particlePool[i]; // Uses particlePool
@@ -2156,7 +2160,9 @@
                     if (trailData) {
                         const trailParam = app.sim.getKeyValue(trailData.data.TRAILTIME, norm);
                         const maxHistory = Math.max(0, Math.floor(trailParam));
-
+                        if (maxHistory > 1) {
+                            HasTrail = 1;
+                        }
                         if (maxHistory > 0) {
                             p.trailTimer += fixedDt; // Use fixedDt!
 
@@ -2352,9 +2358,11 @@
                         pointGroup.particles.push(p);
                     }
                 }
-
                 // --- UPDATE TRAIL RENDERER ---
-                this.updateTrailRenderer();
+                if (HasTrail) {
+                        this.updateTrailRenderer();
+                }
+
 
                 // --- UPDATE GEOMETRY BUFFERS PER TEXTURE GROUP (ES5 compatible iteration) ---
                 for (var textureName in this.textureMeshes) {
