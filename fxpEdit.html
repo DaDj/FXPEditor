@@ -6,16 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GTA SA FXP Editor</title>
 
-   <!--  <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet" type="text/css" /> -->
-
-    <link rel="stylesheet" href="css/Theme.css">
-    <link rel="stylesheet" href="css/all.min.css">
+    <link rel="stylesheet" href="css/Theme.css"> <!-- Daisy UI -->
+    <link rel="stylesheet" href="css/all.min.css"><!-- Font awesome -->
     <script src="js/Tailwind.js"></script>
     <script src="js/three.min.js"></script>
     <script src="js/OrbitControls.js"></script>
 
-<script>
+    <script>
         tailwind.config = {
             theme: {
                 extend: {
@@ -23,25 +20,33 @@
                         gray: { 750: '#2d3748', 850: '#1a202c', 950: '#171923' }
                     }
                 }
-            } }
+            }
+        }
     </script>
-<style>
+    <style>
         [data-theme="dark"] {
             /* Change Primary (Pink) to Blue (#3b82f6) */
-            --p: 217 91% 60%;  /* HSL values for Blue */
-            --pf: 217 91% 50%; /* Darker blue for focus/hover */
-            --pc: 0 0% 100%;   /* White text on primary buttons */
+            --p: 217 91% 60%;
+            /* HSL values for Blue */
+            --pf: 217 91% 50%;
+            /* Darker blue for focus/hover */
+            --pc: 0 0% 100%;
+            /* White text on primary buttons */
 
             /* Change Secondary (Purple) to a darker Blue or Accent */
             --s: 220 14% 96%;
             --sf: 220 14% 86%;
             --sc: 220 14% 10%;
-            
+
             /* Adjust Range Slider colors if needed */
-            --in: 198 93% 60%; /* Info color */
-            --su: 158 64% 52%; /* Success color */
-            --wa: 43 96% 56%;  /* Warning color */
-            --er: 0 91% 71%;   /* Error color */
+            --in: 198 93% 60%;
+            /* Info color */
+            --su: 158 64% 52%;
+            /* Success color */
+            --wa: 43 96% 56%;
+            /* Warning color */
+            --er: 0 91% 71%;
+            /* Error color */
         }
 
         /* Force Override for specific button states if CSS variables fail */
@@ -50,21 +55,22 @@
             border-color: #3b82f6 !important;
             color: white !important;
         }
+
         .btn-primary:hover {
             background-color: #2563eb !important;
             border-color: #2563eb !important;
         }
-        
+
         /* Fix Range Sliders to use Blue instead of Pink */
         .range-primary {
             --range-shdw: #3b82f6;
         }
-        
+
         /* Fix Toggles to use Blue */
         .toggle-primary:checked,
         .toggle-primary[checked="true"],
         .toggle-primary[aria-checked="true"] {
-            --tglbg: #3b82f6; 
+            --tglbg: #3b82f6;
             background-color: #3b82f6 !important;
         }
     </style>
@@ -150,7 +156,7 @@
             background-color: rgba(239, 68, 68, 0.2);
             color: #ef4444;
             transform: scale(1.1);
-             opacity: 1;
+            opacity: 1;
         }
 
         .add-btn {
@@ -170,25 +176,52 @@
             /* Spacing next to trash icon */
             z-index: 10;
         }
-          .add-btn:hover  { opacity: 1; }
+
+        .add-btn:hover {
+            opacity: 1;
+        }
 
         .copy-btn {
-            background: none; border: none;
-            color: #60a5fa; /* Blue-400 */
-            padding: 2px 6px; margin-right: 2px;
-            border-radius: 4px; display: flex; align-items: center; justify-content: center;
-            opacity: 0.2; transition: all 0.2s;
+            background: none;
+            border: none;
+            color: #60a5fa;
+            /* Blue-400 */
+            padding: 2px 6px;
+            margin-right: 2px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.2;
+            transition: all 0.2s;
         }
-        .copy-btn:hover { background-color: rgba(96, 165, 250, 0.2); opacity: 1; transform: scale(1.1); }
+
+        .copy-btn:hover {
+            background-color: rgba(96, 165, 250, 0.2);
+            opacity: 1;
+            transform: scale(1.1);
+        }
 
         .paste-btn {
-            background: none; border: none;
-            color: #fbbf24; /* Amber-400 */
-            padding: 2px 6px; margin-right: 2px;
-            border-radius: 4px; display: flex; align-items: center; justify-content: center;
-            opacity: 0.1; transition: all 0.2s;
+            background: none;
+            border: none;
+            color: #fbbf24;
+            /* Amber-400 */
+            padding: 2px 6px;
+            margin-right: 2px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.1;
+            transition: all 0.2s;
         }
-        .paste-btn:hover { background-color: rgba(251, 191, 36, 0.2); opacity: 1; transform: scale(1.1); }
+
+        .paste-btn:hover {
+            background-color: rgba(251, 191, 36, 0.2);
+            opacity: 1;
+            transform: scale(1.1);
+        }
 
         .add-btn:hover {
             background-color: rgba(74, 222, 128, 0.2);
@@ -217,8 +250,6 @@
             min-height: 6rem;
             /* Ensures the tile body is visible */
         }
-
-       
     </style>
 </head>
 
@@ -252,7 +283,7 @@
                 onchange="handleTextureUpload(this)">
 
             <div class="divider divider-horizontal mx-1"></div>
-          
+
 
             <div class="form-control ml-4">
                 <label class="label cursor-pointer gap-2">
@@ -366,8 +397,9 @@
         <div class="w-96 flex flex-col bg-base-200 border-r border-base-content/10">
             <div class="p-2 bg-base-300 font-bold text-xs uppercase tracking-wider flex justify-between items-center">
                 Hierarchy
-                <button class="btn btn-sm btn-success btn-outline" onclick="app.addSystem()"><i class="fas fa-plus"></i> New
-                System</button>
+                <button class="btn btn-sm btn-success btn-outline" onclick="app.addSystem()"><i class="fas fa-plus"></i>
+                    New
+                    System</button>
             </div>
             <div id="tree-root" class="flex-1 overflow-y-auto custom-scroll p-2 text-sm select-none">
             </div>
@@ -939,6 +971,7 @@
                 this.sizeY = 1.0; // Individual Y size (vertical on screen)
                 this.dirVelocity = new THREE.Vector3(); // NEW: Store normalized velocity for alignment
                 this.history = []; // Stores historical positions for trails
+                this.trailTimer = 0.0; // <--- ADD THIS for 25fps throttling
                 this.rotRandomFactor = 0.0;
                 this.rotDirection = 1.0;
             }
@@ -962,7 +995,7 @@
                 // Trail Ribbon Mesh (NEW)
                 this.baseTrailMaterial = null; // Trail Material Template
                 this.trailMeshes = {}; // {textureName: {mesh, geometry, material, particles}}
-                this.maxTrailSegments = 20; // Max number of segments per trail
+                this.maxTrailSegments = 5; // Max number of segments per trail
 
                 this.activeSystem = null;
                 this.emittersState = [];
@@ -1836,221 +1869,170 @@
 
             }
 
-            // NEW: Trail rendering logic (updates the shared trail mesh)
             updateTrailRenderer() {
-                var totalTrailVertices = 0;
+                if (!this.camera) return;
 
-                // Get world vectors
-                var viewVector = new THREE.Vector3();
-                viewVector.subVectors(this.camera.position, this.controls.target).normalize();
+                const camPos = this.camera.position;
 
-                var tempNormal = new THREE.Vector3();
-                var tempTangent = new THREE.Vector3();
+                // Camera Basis Vectors
+                const camMatrix = this.camera.matrixWorld;
+                const camRight = new THREE.Vector3();
+                const camUp = new THREE.Vector3();
+                camRight.setFromMatrixColumn(camMatrix, 0);
+                camUp.setFromMatrixColumn(camMatrix, 1);
 
-                // Reset active status and clear particles array for each trail mesh
-                for (var textureName in this.trailMeshes) {
-                    if (this.trailMeshes.hasOwnProperty(textureName)) {
-                        this.trailMeshes[textureName].particles.length = 0;
-                        this.trailMeshes[textureName].mesh.visible = false;
-                        this.trailMeshes[textureName].geometry.setDrawRange(0, 0);
-                    }
-                }
+                // Temps
+                const toCam = new THREE.Vector3();
+                const segDir = new THREE.Vector3();
+                const right = new THREE.Vector3();
+                const p1 = new THREE.Vector3();
+                const p2 = new THREE.Vector3();
+                const prevRight = new THREE.Vector3();
 
-                // --- 1. GROUP PARTICLES WITH TRAIL DATA ---
-                for (var i = 0; i < this.maxParticles; i++) {
-                    var p = this.particlePool[i];
+                // Projection Temps
+                const partRight = new THREE.Vector3();
+                const partUp = new THREE.Vector3();
 
-                    if (p.active && p.emitterDef.infos.find(function (info) { return info.type === 'FX_INFO_TRAIL_DATA'; })) {
-                        var group = this.trailMeshes[p.emitterDef._id];
-                        if (group) {
-                            group.particles.push(p);
-                        }
-                    }
-                }
+                // Fallbacks
+                const worldUp = new THREE.Vector3(0, 1, 0);
+                const worldAxisX = new THREE.Vector3(1, 0, 0);
 
-                // --- 2. GENERATE RIBBON GEOMETRY PER TRAIL GROUP ---
-                var totalActiveSegments = 0;
                 for (var textureName in this.trailMeshes) {
                     if (this.trailMeshes.hasOwnProperty(textureName)) {
                         var group = this.trailMeshes[textureName];
-                        var hasActiveTrail = group.particles.length > 0;
+                        const particles = this.textureMeshes[textureName].particles;
 
-                        if (!hasActiveTrail) continue;
+                        if (!particles || particles.length === 0) {
+                            group.mesh.visible = false;
+                            continue;
+                        }
 
-                        var posAttr = group.geometry.attributes.position.array;
-                        var colorAttr = group.geometry.attributes.color.array;
-                        var alphaAttr = group.geometry.attributes.alpha.array;
-                        var uvAttr = group.geometry.attributes.uv.array;
+                        const positions = group.geometry.attributes.position.array;
+                        const colors = group.geometry.attributes.color.array;
+                        const alphas = group.geometry.attributes.alpha.array;
+                        const uvs = group.geometry.attributes.uv.array;
+                        const indices = group.geometry.index.array;
 
-                        var vertexCount = 0;
+                        let vertIdx = 0;
+                        let indIdx = 0;
+                        let particleBaseVertIndex = 0;
 
-                        group.particles.forEach(function (p, pIdx) {
-                            var trail = p.history;
-                            var trailData = p.emitterDef.infos.find(function (i) { return i.type === 'FX_INFO_TRAIL_DATA'; });
+                        particles.forEach(function (p) {
+                            if (!p.active) return;
 
-                            // Check if enough segments are available (2 points minimum needed for one segment/quad)
-                            if (p.history.length < 1) return;
+                            // 1. Gather Points
+                            const rawPoints = [{
+                                pos: p.position,
+                                sizeX: p.sizeX,
+                                sizeY: p.sizeY,
+                                rot: p.rotation
+                            }].concat(p.history);
 
-                            // Determine visible length based on TRAILTIME 
-                            var trailTimeValue = this.getKeyValue(trailData.data.TRAILTIME, p.age / p.life) * ((1 / 25) / FPS_STEP);
-
-
-                            // CRITICAL FIX: Multiplier = MAX(0, TRAILTIME - 1.0). 
-                            var lengthMultiplier = Math.max(0, trailTimeValue - 1.0);
-
-                            // The number of discrete HISTORY points (segments) to include in the ribbon, 
-                            // anchored to the particle head (s=0).
-                            var desiredSegments = Math.max(0, Math.round(lengthMultiplier));
-
-                            // visibleSegments cannot exceed collected history segments
-                            var visibleSegments = Math.min(desiredSegments, trail.length - 1);
-
-                            // pointsToDraw = Segments + 1. 
-                            var pointsToDraw = visibleSegments + 1;
-
-                            // If pointsToDraw <= 1, only the head particle is visible, so we skip drawing the ribbon segment
-                            if (pointsToDraw <= 1) return;
-
-
-                            // Calculate base index for this particle's segment in the global buffer
-                            var maxPointsPerTrail = this.maxTrailSegments + 1;
-                            var baseVertexIndex = pIdx * maxPointsPerTrail * 2;
-
-                            // Loop through points, starting from the head (s=0)
-                            for (var s = 0; s < pointsToDraw; s++) {
-
-                                // Point 0 MUST be the current position (Head)
-                                // Subsequent points are from history buffer (index s-1)
-                                var currentPoint = (s === 0) ? p.position : trail[s - 1];
-
-                                // Next point: 
-                                // The next point is the next history point (trail[s]), or the current point if s is the tail
-                                var nextPoint = (s < trail.length) ? trail[s] : currentPoint;
-
-                                // Point before current (used for tangent stabilization)
-                                var prevPoint = (s === 0) ? currentPoint : ((s === 1) ? p.position : trail[s - 2] || currentPoint);
-
-
-                                // 1. Calculate Tangent (direction of the ribbon at this point)
-                                var isTail = (s === pointsToDraw - 1);
-
-                                if (s === 0 && pointsToDraw > 1) {
-                                    // Head: Direction from current (p.position) towards next point (history[0])
-                                    tempTangent.subVectors(nextPoint, currentPoint).normalize();
+                            // 2. Cleaning Pass (Fix Zero-Point Artifacts)
+                            const cleanPoints = [];
+                            if (rawPoints.length > 0) cleanPoints.push(rawPoints[0]);
+                            for (let k = 1; k < rawPoints.length; k++) {
+                                const last = cleanPoints[cleanPoints.length - 1];
+                                const curr = rawPoints[k];
+                                if (last.pos.distanceToSquared(curr.pos) > 0.0001) {
+                                    cleanPoints.push(curr);
                                 }
-                                else if (!isTail && pointsToDraw > 1) {
-                                    // Middle: Direction from current point (history[s-1]) to next point (history[s])
-                                    tempTangent.subVectors(nextPoint, currentPoint).normalize();
-                                } else if (s > 0) {
-                                    // Tail: Direction from previous point (history[s-2]) towards current point (history[s-1])
-                                    tempTangent.subVectors(currentPoint, prevPoint).normalize();
+                            }
+
+                            const totalPoints = cleanPoints.length;
+                            if (totalPoints < 2) return;
+
+                            const baseAlpha = p.alpha;
+                            prevRight.set(0, 0, 0);
+
+                            for (let i = 0; i < totalPoints; i++) {
+                                const pt = cleanPoints[i];
+                                p1.copy(pt.pos);
+
+                                // --- A. Normal Calculation ---
+                                if (i < totalPoints - 1) {
+                                    p2.copy(cleanPoints[i + 1].pos);
+                                    segDir.subVectors(p2, p1);
                                 } else {
-                                    // Fallback when logic fails (shouldn't happen if pointsToDraw > 1)
-                                    tempTangent.copy(p.dirVelocity);
+                                    segDir.subVectors(p1, cleanPoints[i - 1].pos);
                                 }
+                                segDir.normalize();
 
-                                // Prevent invalid tangent if vector is near zero
-                                if (tempTangent.lengthSq() < 1e-6) {
-                                    tempTangent.set(0, 1, 0); // Default to Y up
+                                toCam.subVectors(camPos, p1).normalize();
+                                right.crossVectors(segDir, toCam);
+
+                                // Singularity Fix
+                                if (right.lengthSq() < 0.001) {
+                                    if (prevRight.lengthSq() > 0.1) {
+                                        right.copy(prevRight);
+                                    } else {
+                                        right.crossVectors(segDir, worldUp);
+                                        if (right.lengthSq() < 0.001) right.crossVectors(segDir, worldAxisX);
+                                    }
                                 }
+                                right.normalize();
+                                if (isNaN(right.x)) right.set(1, 0, 0);
+                                prevRight.copy(right);
 
+                                // --- B. PROJECTED WIDTH (Corrected Thickness) ---
+                                const cosR = Math.cos(pt.rot);
+                                const sinR = Math.sin(pt.rot);
 
-                                // 2. Calculate Normal (width vector, perpendicular to tangent and camera view)
-                                var ribbonWidth = p.sizeX;
+                                partRight.copy(camRight).multiplyScalar(cosR).subVectors(partRight, partUp.copy(camUp).multiplyScalar(sinR));
+                                partUp.copy(camRight).multiplyScalar(sinR).addVectors(partUp, camUp.clone().multiplyScalar(cosR));
 
-                                // This calculation keeps the ribbon facing the camera but oriented along the path.
-                                tempNormal.crossVectors(tempTangent, viewVector).normalize().multiplyScalar(ribbonWidth * 0.5);
+                                const contribX = Math.abs(right.dot(partRight)) * pt.sizeX;
+                                const contribY = Math.abs(right.dot(partUp)) * pt.sizeY;
 
-                                // 3. Calculate Alpha Fade & Color
-                                // Alpha decays along the length of the trail (s / visible length)
-                                var alphaFade = p.alpha * (1.0 - (s / (pointsToDraw - 1))); // Decay from 1.0 (head) to 0.0 (tail)
+                                // CORRECTION: Multiplier changed to 0.25 (Factor of 2 thinner than before)
+                                // This accounts for p.sizeX being the diameter + Boost, while we need visual half-width.
+                                const halfWidth = (contribX + contribY) * 0.25;
 
+                                // --- C. Extrude ---
+                                positions[vertIdx * 3 + 0] = p1.x - (right.x * halfWidth);
+                                positions[vertIdx * 3 + 1] = p1.y - (right.y * halfWidth);
+                                positions[vertIdx * 3 + 2] = p1.z - (right.z * halfWidth);
 
-                                // Buffer index for the current point's vertex pair (vLeft, vRight)
-                                var bufferVertexIndex = baseVertexIndex + s * 2;
+                                positions[(vertIdx + 1) * 3 + 0] = p1.x + (right.x * halfWidth);
+                                positions[(vertIdx + 1) * 3 + 1] = p1.y + (right.y * halfWidth);
+                                positions[(vertIdx + 1) * 3 + 2] = p1.z + (right.z * halfWidth);
 
-                                var bufferPosIndex = bufferVertexIndex * 3;
-                                var bufferColIndex = bufferVertexIndex * 3;
-                                var bufferAlphaIndex = bufferVertexIndex;
-                                var bufferUvIndex = bufferVertexIndex * 2;
+                                // --- D. Attributes ---
+                                colors[vertIdx * 3 + 0] = p.color.r; colors[vertIdx * 3 + 1] = p.color.g; colors[vertIdx * 3 + 2] = p.color.b;
+                                colors[(vertIdx + 1) * 3 + 0] = p.color.r; colors[(vertIdx + 1) * 3 + 1] = p.color.g; colors[(vertIdx + 1) * 3 + 2] = p.color.b;
 
-                                // Vertex 1 (Left side of ribbon: Position - Normal)
-                                var vLeft = tempNormal.clone().negate().add(currentPoint);
-                                posAttr[bufferPosIndex++] = vLeft.x;
-                                posAttr[bufferPosIndex++] = vLeft.y;
-                                posAttr[bufferPosIndex++] = vLeft.z;
+                                const fade = 1.0;// - (i / (totalPoints - 1));
+                                alphas[vertIdx] = baseAlpha * fade;
+                                alphas[vertIdx + 1] = baseAlpha * fade;
 
-                                // Vertex 2 (Right side of ribbon: Position + Normal)
-                                var vRight = tempNormal.clone().add(currentPoint);
-                                posAttr[bufferPosIndex++] = vRight.x;
-                                posAttr[bufferPosIndex++] = vRight.y;
-                                posAttr[bufferPosIndex++] = vRight.z;
+                                const vCoord = i / (totalPoints - 1);
+                                uvs[vertIdx * 2 + 0] = 0.0; uvs[vertIdx * 2 + 1] = vCoord;
+                                uvs[(vertIdx + 1) * 2 + 0] = 1.0; uvs[(vertIdx + 1) * 2 + 1] = vCoord;
 
-                                // Apply Color
-                                colorAttr[bufferColIndex++] = p.color.r;
-                                colorAttr[bufferColIndex++] = p.color.g;
-                                colorAttr[bufferColIndex++] = p.color.b;
-                                colorAttr[bufferColIndex++] = p.color.r;
-                                colorAttr[bufferColIndex++] = p.color.g;
-                                colorAttr[bufferColIndex++] = p.color.b;
-
-                                // Apply Alpha
-                                alphaAttr[bufferAlphaIndex++] = alphaFade;
-                                alphaAttr[bufferAlphaIndex++] = alphaFade;
-
-                                // Apply UVs (V: length, U: width)
-                                var uvV = (s / (pointsToDraw - 1));
-                                uvAttr[bufferUvIndex++] = 0; // U for left vertex
-                                uvAttr[bufferUvIndex++] = uvV; // V (Lengthwise, 0 at head, 1 at tail)
-                                uvAttr[bufferUvIndex++] = 1; // U for right vertex
-                                uvAttr[bufferUvIndex++] = uvV; // V
-
-                                vertexCount += 2;
-                            }
-                            p.alpha = 0.0;
-                            // Fill remaining vertices for this particle with zeros to prevent distortion
-                            for (var s = pointsToDraw; s < maxPointsPerTrail; s++) {
-                                var bufferVertexIndex = baseVertexIndex + s * 2;
-                                var bufferPosIndex = bufferVertexIndex * 3;
-                                // We MUST clear the position buffer for unused vertices!
-                                posAttr[bufferPosIndex++] = 0; posAttr[bufferPosIndex++] = 0; posAttr[bufferPosIndex++] = 0;
-                                posAttr[bufferPosIndex++] = 0; posAttr[bufferPosIndex++] = 0; posAttr[bufferPosIndex++] = 0;
-                                // Set alpha to zero to make sure it's not visible
-                                alphaAttr[bufferVertexIndex] = 0;
-                                alphaAttr[bufferVertexIndex + 1] = 0;
+                                vertIdx += 2;
                             }
 
-                        }.bind(this)); // Bind context for forEach
-
-                        // Update Draw Range
-                        // Total Segments = sum(visibleSegments per particle)
-                        var totalActiveSegments = group.particles.reduce(function (sum, p) {
-                            var pTrailData = p.emitterDef.infos.find(function (i) { return i.type === 'FX_INFO_TRAIL_DATA'; });
-                            if (pTrailData && p.history.length >= 1) {
-                                var trailTimeVal = this.getKeyValue(pTrailData.data.TRAILTIME, p.age / p.life);
-                                // Segments are pointsToDraw - 1
-                                var visibleSegs = Math.min(this.maxTrailSegments, Math.max(0, Math.round(Math.max(0, trailTimeVal - 1.0) * this.maxTrailSegments)));
-                                return sum + visibleSegs;
+                            // Indices
+                            for (let i = 0; i < totalPoints - 1; i++) {
+                                const base = particleBaseVertIndex + (i * 2);
+                                indices[indIdx++] = base; indices[indIdx++] = base + 1; indices[indIdx++] = base + 2;
+                                indices[indIdx++] = base + 1; indices[indIdx++] = base + 3; indices[indIdx++] = base + 2;
                             }
-                            return sum;
-                        }.bind(this), 0);
+                            particleBaseVertIndex = vertIdx;
+                            p.alpha = 0;
+                        });
 
-                        var indicesToDraw = totalActiveSegments * 6; // 6 indices per quad/segment
-
-                        group.geometry.setDrawRange(0, Math.max(0, indicesToDraw));
-
-                        // Mark buffers as needing update
+                        group.geometry.setDrawRange(0, indIdx);
                         group.geometry.attributes.position.needsUpdate = true;
                         group.geometry.attributes.color.needsUpdate = true;
                         group.geometry.attributes.alpha.needsUpdate = true;
                         group.geometry.attributes.uv.needsUpdate = true;
-
-                        group.mesh.visible = hasActiveTrail;
+                        group.geometry.index.needsUpdate = true;
+                        group.mesh.visible = (indIdx > 0);
                     }
                 }
             }
-
-
+            //p.alpha = 0;
             update(dt) {
                 if (!this.isReady || !this.isPlaying || !this.activeSystem) return;
 
@@ -2169,26 +2151,53 @@
                     const norm = p.age / p.life;
 
 
-                    // --- TRAIL HISTORY UPDATE (CRITICAL FOR RIBBON) ---
+                    // --- TRAIL HISTORY UPDATE (25 FPS STRICT) ---
                     var trailData = p.emitterDef.infos.find(function (i) { return i.type === 'FX_INFO_TRAIL_DATA'; });
                     if (trailData) {
-                        // CRITICAL FIX: Ensure history starts immediately and is updated only once per fixed step
-                        if (p.history.length === 0) {
-                            p.history.unshift(p.position.clone());
-                        }
+                        const trailParam = app.sim.getKeyValue(trailData.data.TRAILTIME, norm);
+                        const maxHistory = Math.max(0, Math.floor(trailParam));
 
-                        // History structure: [p.position_t-1, p.position_t-2, ...]
-                        // p.position is the position *after* this frame's integration.
-                        p.history.unshift(p.position.clone());
-                        // Trim excess history segments
-                        if (p.history.length > this.maxTrailSegments) {
-                            p.history.length = this.maxTrailSegments;
+                        if (maxHistory > 0) {
+                            p.trailTimer += fixedDt; // Use fixedDt!
+
+                            // 25 FPS Throttling
+                            if (p.trailTimer >= 0.04) {
+                                p.trailTimer -= 0.04;
+
+                                // Zero-Point / Duplicate Guard
+                                const MIN_DIST_SQ = 0.0001;
+                                let shouldPush = false;
+
+                                if (p.history.length === 0) {
+                                    shouldPush = true;
+                                } else {
+                                    const lastPos = p.history[0].pos;
+                                    if (p.position.distanceToSquared(lastPos) > MIN_DIST_SQ) {
+                                        shouldPush = true;
+                                    }
+                                }
+
+                                if (shouldPush) {
+                                    p.history.unshift({
+                                        pos: p.position.clone(),
+                                        sizeX: p.sizeX,      // Store Width
+                                        sizeY: p.sizeY,      // Store Height
+                                        rot: p.rotation      // Store Rotation
+                                    });
+
+                                    if (p.history.length > maxHistory) {
+                                        p.history.length = maxHistory;
+                                    }
+                                }
+                            }
+                        } else {
+                            p.history.length = 0;
+                            p.trailTimer = 0.0;
                         }
                     } else {
-                        // Ensure history is empty if trail is disabled
                         p.history.length = 0;
+                        p.trailTimer = 0.0;
                     }
-
                     // --- FORCE & G-FORCE (Mapped and Integrated) ---
                     const forceData = p.emitterDef.infos.find(function (i) { return i.type === 'FX_INFO_FORCE_DATA'; });
 
@@ -2976,9 +2985,9 @@
                 content.innerHTML += `<i class="fas fa-${icon} w-4 mr-2 opacity-70 flex-shrink-0"></i> <span class="truncate">${text}</span>`;
                 div.appendChild(content);
 
-          // --- RIGHT SIDE: ACTIONS ---
+                // --- RIGHT SIDE: ACTIONS ---
                 const actions = document.createElement('div');
-                actions.className = "flex items-center flex-shrink-0"; 
+                actions.className = "flex items-center flex-shrink-0";
 
                 // 1. PASTE BUTTON (Condition: Clipboard has data COMPATIBLE with this row)
                 let canPaste = false;
@@ -3024,7 +3033,7 @@
                             app.addEmitter(item);
                         });
                         actions.appendChild(addBtn);
-                    } 
+                    }
                     else if (type === 'emitter') {
                         const addBtn = document.createElement('button');
                         addBtn.className = "add-btn";
@@ -3033,7 +3042,7 @@
                         addBtn.addEventListener('click', function (e) {
                             e.stopPropagation();
                             // Pass ID to modal
-                            app.renderFxInfoModal(item._id); 
+                            app.renderFxInfoModal(item._id);
                             document.getElementById('add_fx_modal').showModal();
                         });
                         actions.appendChild(addBtn);
@@ -3285,14 +3294,14 @@
             },
 
             // --- COPY / PASTE LOGIC ---
-            copyItem: function(id) {
+            copyItem: function (id) {
                 const found = this.findItem(id);
                 if (!found) return;
 
                 // Deep clone the data to prevent reference issues
                 // We strip the _id immediately so we don't accidentally reuse it later
                 const dataClone = JSON.parse(JSON.stringify(found.item));
-                
+
                 this.clipboard = {
                     type: found.type, // 'emitter' or 'info'
                     data: dataClone
@@ -3302,9 +3311,9 @@
                 this.renderTree(); // Re-render to show Paste buttons
             },
 
-            pasteItem: function(targetId) {
+            pasteItem: function (targetId) {
                 if (!this.clipboard) return;
-                
+
                 const found = this.findItem(targetId);
                 if (!found) return;
 
@@ -3314,7 +3323,7 @@
                 // 1. Paste Emitter -> Into System
                 if (pasteType === 'emitter' && targetType === 'system') {
                     const newEm = JSON.parse(JSON.stringify(this.clipboard.data));
-                    
+
                     // REGENERATE IDs (Critical!)
                     newEm._id = uuid();
                     newEm.infos.forEach(i => i._id = uuid()); // Regenerate IDs for children
@@ -3326,7 +3335,7 @@
                 // 2. Paste Info -> Into Emitter
                 else if (pasteType === 'info' && targetType === 'emitter') {
                     const newInfo = JSON.parse(JSON.stringify(this.clipboard.data));
-                    
+
                     // Check duplicates (Optional: GTA usually only allows one block of each type)
                     // If strictly enforcing 1 type per emitter, enable this check:
                     /*
@@ -3598,7 +3607,7 @@
                 parent.appendChild(container);
             },
 
-       
+
             addSystem: function () {
                 const sys = FX_DEFAULTS.system();
                 sys.name = 'NewSystem';
