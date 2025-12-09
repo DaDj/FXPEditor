@@ -1,5 +1,5 @@
-<img width="1560" height="866" alt="image" src="https://github.com/user-attachments/assets/d7540926-0b0c-42d1-aa62-9873c167af37" />
-***
+<img width="1520" height="945" alt="image" src="https://github.com/user-attachments/assets/b7a4242e-88d8-49d1-bf20-126d1c069a1f" />
+
 
 # GTA SA FXP Editor
 
