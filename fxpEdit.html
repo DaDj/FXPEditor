@@ -148,9 +148,7 @@
             z-index: 10;
         }
 
-        .tree-item.selected .delete-btn {
-            
-        }
+        .tree-item.selected .delete-btn {}
 
         .delete-btn:hover {
             background-color: rgba(239, 68, 68, 0.2);
@@ -175,7 +173,7 @@
             margin-right: 4px;
             /* Spacing next to trash icon */
             z-index: 10;
-          
+
         }
 
         .add-btn:hover {
@@ -656,7 +654,7 @@
                     length: undefined,
                     loopInterval: 0,
                     playMode: 0,
-                    culldistance: 50.000, 
+                    culldistance: 50.000,
                     boundingsphere: [0.0, 0.0, 0.0, 0.0],
                     omittextures: 0,
                     txdname: 'NOTXDSET',
@@ -711,6 +709,52 @@
             { type: "FX_INFO_FLOAT_DATA", name: "Generic Float", desc: "A placeholder for generic float data.", icon: "fa-hashtag" },
             { type: "FX_INFO_EMWEATHER_DATA", name: "Weather Link", desc: "Links emitter rate/properties to weather effects (rain, wind).", icon: "fa-cloud-sun-rain" },
         ];
+
+        // --- ZONE DEFINITIONS ---
+        // Zone 1: Emission (Birth)
+        // Zone 2: Physics (Movement)
+        // Zone 3: Rendering (Visuals)
+        const FX_INFO_ZONES = {
+            // Zone 1
+            "FX_INFO_EMLIFE_DATA": 1,
+            "FX_INFO_EMRATE_DATA": 1,
+            "FX_INFO_EMSPEED_DATA": 1,
+            "FX_INFO_EMANGLE_DATA": 1,
+            "FX_INFO_EMDIR_DATA": 1,
+            "FX_INFO_EMSIZE_DATA": 1,
+            "FX_INFO_EMROTATION_DATA": 1,
+            "FX_INFO_EMPOS_DATA": 1,
+            "FX_INFO_EMWEATHER_DATA": 1,
+
+            // Zone 2
+            "FX_INFO_FORCE_DATA": 2,
+            "FX_INFO_FRICTION_DATA": 2,
+            "FX_INFO_WIND_DATA": 2,
+            "FX_INFO_ROTSPEED_DATA": 2,
+            "FX_INFO_NOISE_DATA": 2,
+            "FX_INFO_JITTER_DATA": 2,
+            "FX_INFO_GROUNDCOLLIDE_DATA": 2,
+            "FX_INFO_ATTRACTPT_DATA": 2,
+            "FX_INFO_FLOAT_DATA": 2,
+            "FX_INFO_UNDERWATER_DATA": 2,
+
+            // Zone 3
+            "FX_INFO_SIZE_DATA": 3,
+            "FX_INFO_COLOUR_DATA": 3,
+            "FX_INFO_COLOURBRIGHT_DATA": 3,
+            "FX_INFO_SPRITERECT_DATA": 3,
+            "FX_INFO_DIR_DATA": 3,
+            "FX_INFO_ANIMTEX_DATA": 3,
+            "FX_INFO_TRAIL_DATA": 3,
+            "FX_INFO_FLAT_DATA": 3,
+            "FX_INFO_HEATHAZE_DATA": 3,
+            "FX_INFO_SELFLIT_DATA": 3
+        };
+
+        // Helper to get zone safely (default to Zone 3 if unknown)
+        function getFxZone(type) {
+            return FX_INFO_ZONES[type] || 3;
+        }
 
         // Retain the old flat array for compatibility with old code logic (like default info block initialization)
         const FX_INFO_TYPES = FX_INFO_TYPES_MAP.map(function (i) { return i.type; });
@@ -1984,9 +2028,9 @@
                         particles.forEach(function (p) {
                             if (!p.active) return;
 
-                       // --- NEW: Calculate Forward Extension (The "Tip") ---
+                            // --- NEW: Calculate Forward Extension (The "Tip") ---
                             const forward = new THREE.Vector3();
-                            
+
                             // Calculate direction based on movement history for smooth continuity
                             if (p.history.length > 0) {
                                 forward.subVectors(p.position, p.history[0].pos).normalize();
@@ -2317,7 +2361,7 @@
                     p.velocity.y += fz_sa * fixedDt; // Vertical force
                     p.velocity.z += fy_sa * fixedDt; // Horizontal depth force
 
-                 // --- FRICTION (FX_INFO_FRICTION_DATA) ---
+                    // --- FRICTION (FX_INFO_FRICTION_DATA) ---
                     const frictionData = p.emitterDef.infos.find(function (i) { return i.type === 'FX_INFO_FRICTION_DATA'; });
                     if (frictionData) {
                         // FIX: Check for 'FRICTION' key first (used by Editor), fallback to 'MIN' (Legacy/Import)
@@ -2325,7 +2369,7 @@
                         if (!fKey && frictionData.data.MIN) fKey = frictionData.data.MIN;
 
                         const friction = this.getKeyValue(fKey, norm);
-                        
+
                         // Apply friction
                         // Only apply if friction > 0 to save math operations
                         if (friction > 0.001) {
@@ -2687,6 +2731,29 @@
             sim: new Simulator(),
             selectedFxTypes: [], // CHANGED: Now an array for multi-selection
             clipboard: null, // Stores { type: 'emitter'|'info', data: Object }
+
+
+            // Sorts the infos array of a specific emitter based on FX_INFO_ZONES
+            sortEmitterInfos: function (emitter) {
+                if (!emitter || !emitter.infos) return;
+
+                emitter.infos.sort(function (a, b) {
+                    const zoneA = getFxZone(a.type);
+                    const zoneB = getFxZone(b.type);
+
+                    // Primary Sort: Zone
+                    if (zoneA !== zoneB) {
+                        return zoneA - zoneB;
+                    }
+
+                    // Secondary Sort: Alphabetical by type (to keep order consistent within zones)
+                    if (a.type < b.type) return -1;
+                    if (a.type > b.type) return 1;
+                    return 0;
+                });
+            },
+
+
 
             // Helper function to find interpolation value for a given time
             // Used internally by syncKeyframe
@@ -3126,7 +3193,7 @@
                     });
                     actions.appendChild(copyBtn);
                 }
-                  // --- MOVE BUTTONS (Only for Info items) ---
+                // --- MOVE BUTTONS (Only for Info items) ---
                 if (type === 'emitter') {
                     // Move Up
                     const upBtn = document.createElement('button');
@@ -3181,7 +3248,7 @@
                     }
                 }
 
-              
+
                 // 4. DELETE BUTTON
                 const delBtn = document.createElement('button');
                 delBtn.className = "delete-btn";
@@ -3297,13 +3364,13 @@
                 }
             },
             addBlendSelect: function (parent, label, propKey, target, root) {
-     const d = document.createElement('div');
+                const d = document.createElement('div');
                 d.className = 'flex items-center mb-2';
-                
+
                 const lbl = document.createElement('div');
                 lbl.className = 'text-xs font-bold opacity-60 w-40 flex-shrink-0 truncate';
                 lbl.innerText = label;
-                
+
                 const sel = document.createElement('select');
                 sel.className = 'select select-sm select-bordered w-50 flex-shrink-0 h-5';
 
@@ -3359,25 +3426,25 @@
                 delBtn.onclick = function () { self.deleteSelected(); };
                 pAct.appendChild(delBtn);
 
-            if (type === 'system') {
+                if (type === 'system') {
                     // 1. Basic Inputs
                     this.addInput(pDiv, 'Name', target.name, function (v) { target.name = v; });
                     this.addInput(pDiv, 'Length', target.length, function (v) { target.length = parseFloat(v); }, 'number');
                     this.addInput(pDiv, 'Play Mode', target.playMode, function (v) { target.playMode = parseInt(v); }, 'number');
                     this.addInput(pDiv, 'Loop Interval', target.loopInterval, function (v) { target.loopInterval = parseFloat(v); }, 'number');
-                    
+
                     // 2. FIXED: Cull Distance (Was buggy before)
                     this.addInput(pDiv, 'Cull Distance', target.culldistance, function (v) { target.culldistance = parseFloat(v); }, 'number');
 
-           
 
 
-                        // 4. FIXED: Omit Textures (Was buggy before)
+
+                    // 4. FIXED: Omit Textures (Was buggy before)
                     this.addInput(pDiv, 'Omit Textures', target.omittextures, function (v) { target.omittextures = parseInt(v); }, 'number');
 
-             // 3. NEW: Bounding Sphere (X, Y, Z, Radius)
+                    // 3. NEW: Bounding Sphere (X, Y, Z, Radius)
                     const bsDiv = document.createElement('div');
-                    bsDiv.className = "flex items-center mb-2  border-t border-base-content/10"; 
+                    bsDiv.className = "flex items-center mb-2  border-t border-base-content/10";
 
                     // Main Left Label
                     const lbl = document.createElement('div');
@@ -3385,16 +3452,16 @@
                     lbl.innerText = "Bound Sphere";
                     lbl.title = "Bounding Sphere (X, Y, Z, Radius)";
 
-      
+
                     // Right-side Grid Container
                     const bsGrid = document.createElement('div');
                     bsGrid.className = "grid grid-rows-4 gap-2  flex-shrink ";
-                    
+
                     // Ensure array exists
-                    if (!target.boundingsphere || target.boundingsphere.length < 4) target.boundingsphere = [0,0,0,0];
+                    if (!target.boundingsphere || target.boundingsphere.length < 4) target.boundingsphere = [0, 0, 0, 0];
 
                     const labels = ['X', 'Y', 'Z', 'Radius'];
-                    
+
                     target.boundingsphere.forEach((val, idx) => {
                         // Create a wrapper for "Label + Input" to keep them together
                         const wrapper = document.createElement('div');
@@ -3412,7 +3479,7 @@
                         inp.step = "0.1";
                         inp.value = val;
                         inp.title = labels[idx];
-                        
+
                         inp.onchange = (e) => {
                             target.boundingsphere[idx] = parseFloat(e.target.value);
                             this.save();
@@ -3426,7 +3493,7 @@
                     bsDiv.appendChild(lbl);
                     bsDiv.appendChild(bsGrid);
                     pDiv.appendChild(bsDiv);
-                 
+
 
                     // Add Emitter Button
                     const btn = document.createElement('button');
@@ -3442,17 +3509,17 @@
                     this.addInput(pDiv, 'Name', target.name, function (v) { target.name = v; });
                     // Ensure Texture change triggers system update to load new texture
                     // 2. Texture Slots (1-4) [FIX: Added inputs for all slots]
-                   this.addTextureInput(pDiv, 'Texture 1 (Primary)', target, 'texture');
+                    this.addTextureInput(pDiv, 'Texture 1 (Primary)', target, 'texture');
                     this.addTextureInput(pDiv, 'Texture 2', target, 'texture2');
                     this.addTextureInput(pDiv, 'Texture 3', target, 'texture3');
                     this.addTextureInput(pDiv, 'Texture 4', target, 'texture4');
                     this.addInput(pDiv, 'Lod Start', target.lodstart, function (v) { target = parseFloat(v); }, 'number');
                     this.addInput(pDiv, 'Lod End', target.lodend, function (v) { target = parseFloat(v); }, 'number');
 
- // 2. AlphaOn (Toggle)
+                    // 2. AlphaOn (Toggle)
                     const alphaToggle = document.createElement('div');
                     // "flex items-center" puts them on the same line
-                    alphaToggle.className = 'flex items-center mb-2'; 
+                    alphaToggle.className = 'flex items-center mb-2';
 
                     // Label with fixed width (Matches your other inputs)
                     const alphaLbl = document.createElement('div');
@@ -3463,13 +3530,13 @@
                     const alphaInp = document.createElement('input');
                     alphaInp.type = "checkbox";
                     // Removed 'toggle-accent', just using base style
-                    alphaInp.className = "toggle toggle-sm"; 
+                    alphaInp.className = "toggle toggle-sm";
                     alphaInp.checked = (target.alphaOn == 1);
-                    
+
                     alphaInp.onchange = function (e) {
                         target.alphaOn = e.target.checked ? 1 : 0;
                         self.save();
-                        self.sim.setActiveSystem(found.root); 
+                        self.sim.setActiveSystem(found.root);
                     };
 
                     alphaToggle.appendChild(alphaLbl);
@@ -3592,7 +3659,7 @@
 
             // --- NEW: Helper for Property Editor ---
             addTextureInput: function (parent, label, obj, prop) {
-         const d = document.createElement('div');
+                const d = document.createElement('div');
                 d.className = 'flex items-center mb-2';
 
                 const lbl = document.createElement('div');
@@ -3626,7 +3693,7 @@
 
                 group.appendChild(inp);
                 group.appendChild(btn);
-                
+
                 d.appendChild(lbl);
                 d.appendChild(group);
                 parent.appendChild(d);
@@ -3686,6 +3753,7 @@
 
                     newInfo._id = uuid(); // Regenerate ID
                     found.item.infos.push(newInfo);
+                    this.sortEmitterInfos(found.item);
                     this.select(newInfo._id);
                 }
 
@@ -3737,10 +3805,10 @@
             },
 
             addInput: function (parent, label, val, cb, type = 'text') {
-               const d = document.createElement('div');
+                const d = document.createElement('div');
                 // Use Flexbox row layout
                 d.className = 'flex items-center mb-2';
-                
+
                 // Create fixed-width label (w-32 = 8rem)
                 const lbl = document.createElement('div');
                 lbl.className = ' font-bold opacity-60 w-40 flex-shrink-0 truncate';
@@ -3750,11 +3818,11 @@
                 const inp = document.createElement('input');
                 // Flex-1 takes remaining width
                 inp.className = 'input input-sm input-bordered flex-shrink w-50 h-7';
-                inp.type = type; 
+                inp.type = type;
                 inp.value = val;
                 inp.step = '0.1';
                 inp.onchange = function (e) { cb(e.target.value); this.save(); this.renderTree(); }.bind(this);
-                
+
                 d.appendChild(lbl);
                 d.appendChild(inp);
                 parent.appendChild(d);
@@ -4153,6 +4221,7 @@
                         found.item.infos.push(info);
                     }.bind(this)); // Bind context for forEach
 
+                    this.sortEmitterInfos(found.item);
                     // Select the first added item if possible, otherwise select the emitter
                     const newId = found.item.infos.length > 0 ? found.item.infos[found.item.infos.length - 1]._id : found.item._id;
                     this.select(newId);
