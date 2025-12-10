@@ -93,6 +93,15 @@
             background: #6b7280;
         }
 
+
+.table2 {
+    position: relative;
+    /* width: 100%; */
+    text-align: left;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    border-radius: var(--rounded-box, 1rem);
+}
         .tree-item {
             cursor: pointer;
             user-select: none;
@@ -3882,40 +3891,60 @@
 
                 return sortedTimes; // Return the master time list
             },
+            // --- COLOR HELPERS ---
+            rgbToHex(r, g, b) {
+                const toHex = (c) => {
+                    const hex = Math.max(0, Math.min(255, Math.round(c))).toString(16);
+                    return hex.length === 1 ? "0" + hex : hex;
+                };
+                return "#" + toHex(r) + toHex(g) + toHex(b);
+            },
+
+            hexToRgb(hex) {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16)
+                } : null;
+            },
 
             // NEW: Renders the spreadsheet-like UI
+    // NEW: Renders the spreadsheet-like UI with Color Picker
             renderUnifiedTable: function (parent, infoData) {
                 // 1. Sync data first
                 const times = this.unifyInfoData(infoData);
-                if (!times) return; // Should not happen if we checked type
+                if (!times) return; 
 
-                // Container for the scrollable table
+                // Check if this is a color block
+                const isColorBlock = infoData.hasOwnProperty('RED') && infoData.hasOwnProperty('GREEN') && infoData.hasOwnProperty('BLUE');
+
+                // REFERENCE MAP: Stores direct pointers to input elements [Property][KeyIndex]
+                const inputRefs = {}; 
+
                 const container = document.createElement('div');
                 container.className = "overflow-x-auto bg-base-200 rounded border border-base-content/10 mb-4 shadow-inner custom-scroll";
 
                 const table = document.createElement('table');
-                table.className = "table table-xs table-pin-rows";
+                table.className = "table2 table-xs table-pin-rows";
 
                 // --- HEADER (Time Values) ---
                 const thead = document.createElement('thead');
                 const headerRow = document.createElement('tr');
-
-                // Corner Cell
+                
                 const corner = document.createElement('th');
                 corner.className = "bg-base-300 z-10 w-24 min-w-[6rem]";
                 corner.innerText = "Property";
                 headerRow.appendChild(corner);
 
-                // Time Columns
                 times.forEach((time, tIdx) => {
                     const th = document.createElement('th');
-                    th.className = "text-center min-w-[7rem] p-1 bg-base-300 align-middle"; // Increased width slightly
-
-                    // NEW: Flex Row layout (items-center) instead of Column
+                    th.className = "text-center min-w-[7rem] p-1 bg-base-300 align-middle";
+                    
                     const div = document.createElement('div');
                     div.className = "flex items-center justify-center gap-1";
 
-                    // 1. Delete Button (Left) - Only if not first key
+                    // Delete Key Button
                     if (tIdx > 0) {
                         const delBtn = document.createElement('button');
                         delBtn.className = "btn btn-xs btn-square btn-ghost text-error opacity-50 hover:opacity-100";
@@ -3930,17 +3959,13 @@
                         };
                         div.appendChild(delBtn);
                     } else {
-                        // Spacer to keep alignment for the first column
-                        const spacer = document.createElement('div');
-                        spacer.className = "w-6 h-6";
-                        div.appendChild(spacer);
+                        div.appendChild(document.createElement('div')).className = "w-6 h-6"; // Spacer
                     }
 
-                    // 2. Time Input (Center)
+                    // Time Input
                     const tInput = document.createElement('input');
                     tInput.type = "number";
                     tInput.step = "0.05";
-                    // Fixed width (w-14) so it fits nicely between buttons
                     tInput.className = "input input-xs input-ghost text-center font-bold text-accent w-14 p-0 h-6";
                     tInput.value = time;
                     tInput.onchange = (e) => {
@@ -3953,15 +3978,13 @@
                     };
                     div.appendChild(tInput);
 
-                    // 3. Insert Button (Right)
+                    // Insert Button
                     const addBtn = document.createElement('button');
                     addBtn.className = "btn btn-xs btn-square btn-ghost text-success opacity-50 hover:opacity-100";
-                    addBtn.title = "Insert Key After";
-                    addBtn.innerHTML = '<i class="fas fa-plus "></i>';
+                    addBtn.innerHTML = '<i class="fas fa-plus"></i>';
                     addBtn.onclick = () => {
                         let nextTime = (tIdx < times.length - 1) ? times[tIdx + 1] : (time + 0.5);
                         let newTime = (time + nextTime) / 2;
-
                         for (const key in infoData) {
                             if (infoData[key].keys) {
                                 const val = this.getInterpValue(infoData[key].keys, newTime);
@@ -3979,37 +4002,92 @@
                 thead.appendChild(headerRow);
                 table.appendChild(thead);
 
-                // --- BODY (Values) ---
                 const tbody = document.createElement('tbody');
 
+                // --- 1. SPECIAL COLOR PICKER ROW ---
+                if (isColorBlock) {
+                    const colorRow = document.createElement('tr');
+                    
+                    const label = document.createElement('td');
+                    label.className = "font-bold text-xs bg-base-200 sticky left-0 border-r border-base-content/10 flex items-center gap-2";
+                    label.innerHTML = '<i class="fas fa-palette text-secondary"></i> Color';
+                    colorRow.appendChild(label);
+
+                    times.forEach((time, tIdx) => {
+                        const cell = document.createElement('td');
+                        cell.className = "p-1 text-center";
+
+                        const r = infoData['RED'].keys[tIdx].val;
+                        const g = infoData['GREEN'].keys[tIdx].val;
+                        const b = infoData['BLUE'].keys[tIdx].val;
+
+                        const picker = document.createElement('input');
+                        picker.type = "color";
+                        picker.className = "input input-xs w-full h-6 cursor-pointer p-0 bg-transparent border-0";
+                        
+                        // Use helper (this.rgbToHex)
+                        picker.value = this.rgbToHex(r, g, b);
+
+                        picker.oninput = (e) => {
+                            const rgb = this.hexToRgb(e.target.value);
+                            if (rgb) {
+                                // Update Data Model
+                                infoData['RED'].keys[tIdx].val = rgb.r;
+                                infoData['GREEN'].keys[tIdx].val = rgb.g;
+                                infoData['BLUE'].keys[tIdx].val = rgb.b;
+
+                                // Update Visual Inputs via Reference Map
+                                // Note: inputRefs will be fully populated by the time this event fires
+                                if (inputRefs['RED'] && inputRefs['RED'][tIdx]) inputRefs['RED'][tIdx].value = rgb.r;
+                                if (inputRefs['GREEN'] && inputRefs['GREEN'][tIdx]) inputRefs['GREEN'][tIdx].value = rgb.g;
+                                if (inputRefs['BLUE'] && inputRefs['BLUE'][tIdx]) inputRefs['BLUE'][tIdx].value = rgb.b;
+
+                                this.save();
+                            }
+                        };
+
+                        cell.appendChild(picker);
+                        colorRow.appendChild(cell);
+                    });
+                    tbody.appendChild(colorRow);
+                }
+
+                // --- 2. STANDARD NUMERIC ROWS ---
                 for (const key in infoData) {
                     const prop = infoData[key];
-                    // Skip non-interpolated properties (like TIMEMODEPRT)
                     if (!prop || !prop.keys) continue;
 
-                    const row = document.createElement('tr');
+                    // Initialize reference array for this property
+                    if (!inputRefs[key]) inputRefs[key] = [];
 
-                    // Label Cell
+                    const row = document.createElement('tr');
+                    
                     const label = document.createElement('td');
                     label.className = "font-bold text-xs bg-base-200 sticky left-0 border-r border-base-content/10";
                     label.innerText = key;
                     row.appendChild(label);
 
-                    // Value Cells
                     prop.keys.forEach((k, idx) => {
                         const cell = document.createElement('td');
                         cell.className = "p-1";
 
                         const vInput = document.createElement('input');
                         vInput.type = "number";
-                        vInput.step = "0.01"; // Default step
-                        if (Math.abs(k.val) > 10) vInput.step = "1"; // Adapt step for large values
+                        vInput.step = "0.01"; 
+                        if (Math.abs(k.val) > 10) vInput.step = "1"; 
                         vInput.className = "input input-xs input-bordered w-full text-right focus:input-primary";
-                        vInput.value = k.val; // Don't fix decimal here to allow raw editing
+                        vInput.value = k.val; 
+
+                        // STORE DIRECT REFERENCE
+                        inputRefs[key][idx] = vInput;
 
                         vInput.onchange = (e) => {
                             k.val = parseFloat(e.target.value);
                             this.save();
+                            // If user types numbers manually, force re-render to update the color picker visual state
+                            if (isColorBlock && (key === 'RED' || key === 'GREEN' || key === 'BLUE')) {
+                                this.renderProperties(this.findItem(this.selectedId).item, 'info'); 
+                            }
                         };
 
                         cell.appendChild(vInput);
@@ -4023,7 +4101,6 @@
                 container.appendChild(table);
                 parent.appendChild(container);
             },
-
             addSystem: function () {
                 const sys = FX_DEFAULTS.system();
                 sys.name = 'NewSystem';
