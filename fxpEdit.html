@@ -3126,6 +3126,32 @@
                     });
                     actions.appendChild(copyBtn);
                 }
+                  // --- MOVE BUTTONS (Only for Info items) ---
+                if (type === 'emitter') {
+                    // Move Up
+                    const upBtn = document.createElement('button');
+                    // Reuse copy-btn class for consistent sizing/fading
+                    upBtn.className = "copy-btn text-base-content/50 hover:text-white";
+                    upBtn.innerHTML = '<i class="fas fa-chevron-up text-[10px]"></i>';
+                    upBtn.title = "Move Up";
+                    upBtn.onclick = function (e) {
+                        e.stopPropagation();
+                        app.moveItem(id, -1);
+                    };
+                    actions.appendChild(upBtn);
+
+                    // Move Down
+                    const downBtn = document.createElement('button');
+                    downBtn.className = "copy-btn text-base-content/50 hover:text-white";
+                    downBtn.innerHTML = '<i class="fas fa-chevron-down text-[10px]"></i>';
+                    downBtn.title = "Move Down";
+                    downBtn.onclick = function (e) {
+                        e.stopPropagation();
+                        app.moveItem(id, 1);
+                    };
+                    actions.appendChild(downBtn);
+                }
+
 
                 // 3. ADD BUTTON (Only if Selected)
                 if (true) {
@@ -3155,32 +3181,7 @@
                     }
                 }
 
-                // --- MOVE BUTTONS (Only for Info items) ---
-                if (type === 'emitter') {
-                    // Move Up
-                    const upBtn = document.createElement('button');
-                    // Reuse copy-btn class for consistent sizing/fading
-                    upBtn.className = "copy-btn text-base-content/50 hover:text-white";
-                    upBtn.innerHTML = '<i class="fas fa-chevron-up text-[10px]"></i>';
-                    upBtn.title = "Move Up";
-                    upBtn.onclick = function (e) {
-                        e.stopPropagation();
-                        app.moveItem(id, -1);
-                    };
-                    actions.appendChild(upBtn);
-
-                    // Move Down
-                    const downBtn = document.createElement('button');
-                    downBtn.className = "copy-btn text-base-content/50 hover:text-white";
-                    downBtn.innerHTML = '<i class="fas fa-chevron-down text-[10px]"></i>';
-                    downBtn.title = "Move Down";
-                    downBtn.onclick = function (e) {
-                        e.stopPropagation();
-                        app.moveItem(id, 1);
-                    };
-                    actions.appendChild(downBtn);
-                }
-
+              
                 // 4. DELETE BUTTON
                 const delBtn = document.createElement('button');
                 delBtn.className = "delete-btn";
