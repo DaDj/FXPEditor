@@ -112,9 +112,9 @@
         }
 
         .tree-item.selected {
-            background-color: #2563eb;
+            background-color: #1f2c4b;
             color: white;
-            border-color: #3b82f6;
+            border-color: #294064;
         }
 
         .tree-children {
@@ -149,7 +149,7 @@
         }
 
         .tree-item.selected .delete-btn {
-            opacity: 1;
+            
         }
 
         .delete-btn:hover {
@@ -160,7 +160,7 @@
         }
 
         .add-btn {
-            opacity: 0.2;
+            opacity: 0.3;
             /* Always visible if rendered */
             transition: all 0.2s;
             background: none;
@@ -175,6 +175,7 @@
             margin-right: 4px;
             /* Spacing next to trash icon */
             z-index: 10;
+          
         }
 
         .add-btn:hover {
@@ -645,7 +646,7 @@
 
         // --- CONSTANTS ---
         const FPS_STEP = 1 / 60; // 30 frames per second target simulation rate
-
+        const PLAY_SPEEDFACTOR = 0.8; //we play only on 80% speed. feels more correct compared to GTA SA
 
         const FX_DEFAULTS = {
             system: function () {
@@ -655,7 +656,7 @@
                     length: undefined,
                     loopInterval: 0,
                     playMode: 0,
-                    culldistance: 50.000,
+                    culldistance: 50.000, 
                     boundingsphere: [0.0, 0.0, 0.0, 0.0],
                     omittextures: 0,
                     txdname: 'NOTXDSET',
@@ -1983,13 +1984,40 @@
                         particles.forEach(function (p) {
                             if (!p.active) return;
 
-                            // 1. Gather Points
-                            const rawPoints = [{
-                                pos: p.position,
-                                sizeX: p.sizeX,
-                                sizeY: p.sizeY,
-                                rot: p.rotation
-                            }].concat(p.history);
+                       // --- NEW: Calculate Forward Extension (The "Tip") ---
+                            const forward = new THREE.Vector3();
+                            
+                            // Calculate direction based on movement history for smooth continuity
+                            if (p.history.length > 0) {
+                                forward.subVectors(p.position, p.history[0].pos).normalize();
+                            } else if (p.velocity.lengthSq() > 0.001) {
+                                // Fallback to velocity if no history yet
+                                forward.copy(p.velocity).normalize();
+                            } else {
+                                forward.set(0, 1, 0);
+                            }
+
+                            // Calculate tip position: CurrentPos + (Direction * Radius)
+                            // Using 0.5 because sizeX/Y are Diameters
+                            const radius = Math.max(p.sizeX, p.sizeY) * 0.5;
+                            const tipPos = p.position.clone().addScaledVector(forward, radius);
+
+                            // 1. Gather Points (Now starting with the Tip)
+                            const rawPoints = [
+                                {
+                                    pos: tipPos,
+                                    sizeX: p.sizeX,
+                                    sizeY: p.sizeY,
+                                    rot: p.rotation
+                                },
+                                {
+                                    pos: p.position,
+                                    sizeX: p.sizeX,
+                                    sizeY: p.sizeY,
+                                    rot: p.rotation
+                                }
+                            ].concat(p.history);
+
 
                             // 2. Cleaning Pass (Fix Zero-Point Artifacts)
                             const cleanPoints = [];
@@ -2101,7 +2129,7 @@
 
                 // 1. Fixed Time Step Setup
                 var simulationStep = FPS_STEP; // Integration step is always 1/30th of a second
-                this.timeAccumulator += dt * this.timeScale * 0.8; // Time accumulated is modified by timescale
+                this.timeAccumulator += dt * this.timeScale * PLAY_SPEEDFACTOR; // Time accumulated is modified by timescale
 
                 var steps = 0;
                 while (this.timeAccumulator >= simulationStep && steps < 4) { // Fixed step size for integration
@@ -3268,11 +3296,15 @@
                 }
             },
             addBlendSelect: function (parent, label, propKey, target, root) {
-                const d = document.createElement('div');
-                d.className = 'form-control mb-2';
-                d.innerHTML = `<label class="label py-0 text-xs font-bold opacity-60">${label}</label>`;
+     const d = document.createElement('div');
+                d.className = 'flex items-center mb-2';
+                
+                const lbl = document.createElement('div');
+                lbl.className = 'text-xs font-bold opacity-60 w-40 flex-shrink-0 truncate';
+                lbl.innerText = label;
+                
                 const sel = document.createElement('select');
-                sel.className = 'select select-sm select-bordered w-full';
+                sel.className = 'select select-sm select-bordered w-50 flex-shrink-0 h-5';
 
                 // FIXED: Mapped based on GTA SA 'effects.fxp' usage
                 const options = [
@@ -3300,6 +3332,7 @@
                     this.sim.setActiveSystem(root);
                 }.bind(this);
 
+                d.appendChild(lbl);
                 d.appendChild(sel);
                 parent.appendChild(d);
             },
@@ -3325,18 +3358,79 @@
                 delBtn.onclick = function () { self.deleteSelected(); };
                 pAct.appendChild(delBtn);
 
-                if (type === 'system') {
+            if (type === 'system') {
+                    // 1. Basic Inputs
                     this.addInput(pDiv, 'Name', target.name, function (v) { target.name = v; });
                     this.addInput(pDiv, 'Length', target.length, function (v) { target.length = parseFloat(v); }, 'number');
-
                     this.addInput(pDiv, 'Play Mode', target.playMode, function (v) { target.playMode = parseInt(v); }, 'number');
-                    this.addInput(pDiv, 'Loop Int', target.loopInterval, function (v) { target.loopInterval = parseFloat(v); }, 'number');
-                    this.addInput(pDiv, 'Culldist', target.culldistance, function (v) { target = parseFloat(v); }, 'number');
-                    this.addInput(pDiv, 'Omit textures', target.omittextures, function (v) { target = parseInt(v); }, 'number');
+                    this.addInput(pDiv, 'Loop Interval', target.loopInterval, function (v) { target.loopInterval = parseFloat(v); }, 'number');
+                    
+                    // 2. FIXED: Cull Distance (Was buggy before)
+                    this.addInput(pDiv, 'Cull Distance', target.culldistance, function (v) { target.culldistance = parseFloat(v); }, 'number');
 
+           
+
+
+                        // 4. FIXED: Omit Textures (Was buggy before)
+                    this.addInput(pDiv, 'Omit Textures', target.omittextures, function (v) { target.omittextures = parseInt(v); }, 'number');
+
+             // 3. NEW: Bounding Sphere (X, Y, Z, Radius)
+                    const bsDiv = document.createElement('div');
+                    bsDiv.className = "flex items-center mb-2  border-t border-base-content/10"; 
+
+                    // Main Left Label
+                    const lbl = document.createElement('div');
+                    lbl.className = ' font-bold opacity-60 w-40 flex-shrink-0 truncate';
+                    lbl.innerText = "Bound Sphere";
+                    lbl.title = "Bounding Sphere (X, Y, Z, Radius)";
+
+      
+                    // Right-side Grid Container
+                    const bsGrid = document.createElement('div');
+                    bsGrid.className = "grid grid-rows-4 gap-2  flex-shrink ";
+                    
+                    // Ensure array exists
+                    if (!target.boundingsphere || target.boundingsphere.length < 4) target.boundingsphere = [0,0,0,0];
+
+                    const labels = ['X', 'Y', 'Z', 'Radius'];
+                    
+                    target.boundingsphere.forEach((val, idx) => {
+                        // Create a wrapper for "Label + Input" to keep them together
+                        const wrapper = document.createElement('div');
+                        wrapper.className = "flex items-center gap-1 ";
+
+                        // The small label (X, Y, Z, Radius) - No fixed width
+                        const subLbl = document.createElement('span');
+                        subLbl.className = "text-[10px] font-bold opacity-50 flex-shrink";
+                        subLbl.innerText = labels[idx];
+
+                        // The Input
+                        const inp = document.createElement('input');
+                        inp.className = "input input-sm input-bordered h-7 px-1 text-center text-xs flex-1"; // flex-1 fills remaining space
+                        inp.type = "number";
+                        inp.step = "0.1";
+                        inp.value = val;
+                        inp.title = labels[idx];
+                        
+                        inp.onchange = (e) => {
+                            target.boundingsphere[idx] = parseFloat(e.target.value);
+                            this.save();
+                        };
+
+                        wrapper.appendChild(subLbl);
+                        wrapper.appendChild(inp);
+                        bsGrid.appendChild(wrapper);
+                    });
+
+                    bsDiv.appendChild(lbl);
+                    bsDiv.appendChild(bsGrid);
+                    pDiv.appendChild(bsDiv);
+                 
+
+                    // Add Emitter Button
                     const btn = document.createElement('button');
                     btn.className = 'btn btn-xs btn-success';
-                    btn.innerText = '+ Emitter';
+                    btn.innerText = '+ Add Emitter';
                     btn.onclick = function () { self.addEmitter(target); };
                     pAct.appendChild(btn);
                 }
@@ -3354,18 +3448,31 @@
                     this.addInput(pDiv, 'Lod Start', target.lodstart, function (v) { target = parseFloat(v); }, 'number');
                     this.addInput(pDiv, 'Lod End', target.lodend, function (v) { target = parseFloat(v); }, 'number');
 
-                    // 2. AlphaOn (Toggle)
+ // 2. AlphaOn (Toggle)
                     const alphaToggle = document.createElement('div');
-                    alphaToggle.className = 'form-control mb-2 flex items-center gap-3';
-                    alphaToggle.innerHTML = `
-            <label class="label cursor-pointer py-0 text-xs font-bold opacity-60">ALPHA ON (1/0)</label>
-            <input type="checkbox" class="toggle toggle-sm toggle-accent" ${target.alphaOn == 1 ? 'checked' : ''}>
-        `;
-                    alphaToggle.querySelector('input').onchange = function (e) {
+                    // "flex items-center" puts them on the same line
+                    alphaToggle.className = 'flex items-center mb-2'; 
+
+                    // Label with fixed width (Matches your other inputs)
+                    const alphaLbl = document.createElement('div');
+                    alphaLbl.className = 'text-xs font-bold opacity-60 w-40 flex-shrink-0 truncate';
+                    alphaLbl.innerText = "ALPHA ON (1/0)";
+
+                    // Toggle Input
+                    const alphaInp = document.createElement('input');
+                    alphaInp.type = "checkbox";
+                    // Removed 'toggle-accent', just using base style
+                    alphaInp.className = "toggle toggle-sm"; 
+                    alphaInp.checked = (target.alphaOn == 1);
+                    
+                    alphaInp.onchange = function (e) {
                         target.alphaOn = e.target.checked ? 1 : 0;
                         self.save();
-                        self.sim.setActiveSystem(found.root); // Reapply material settings
+                        self.sim.setActiveSystem(found.root); 
                     };
+
+                    alphaToggle.appendChild(alphaLbl);
+                    alphaToggle.appendChild(alphaInp);
                     pDiv.appendChild(alphaToggle);
 
                     // 3. Blend IDs (Dropdowns for common modes)
@@ -3484,16 +3591,20 @@
 
             // --- NEW: Helper for Property Editor ---
             addTextureInput: function (parent, label, obj, prop) {
-                const d = document.createElement('div');
-                d.className = 'form-control mb-2';
-                d.innerHTML = `<label class="label py-0 text-xs font-bold opacity-60">${label}</label>`;
+         const d = document.createElement('div');
+                d.className = 'flex items-center mb-2';
+
+                const lbl = document.createElement('div');
+                lbl.className = ' font-bold opacity-60 w-40 flex-shrink-0 truncate';
+                lbl.innerText = label;
+                lbl.title = label;
 
                 const group = document.createElement('div');
-                group.className = 'join w-full';
+                group.className = 'join flex-1 min-w-0';
 
                 // 1. Text Input (Editable)
                 const inp = document.createElement('input');
-                inp.className = 'input input-sm input-bordered join-item w-full';
+                inp.className = 'input input-sm input-bordered join-item flex-shrink w-50 h-7';
                 inp.type = 'text';
                 inp.value = obj[prop] || 'null';
                 inp.onchange = function (e) {
@@ -3505,7 +3616,7 @@
 
                 // 2. Browser Button
                 const btn = document.createElement('button');
-                btn.className = 'btn btn-sm btn-neutral join-item';
+                btn.className = 'btn btn-sm btn-neutral join-item h-7 min-h-0';
                 btn.innerHTML = '<i class="fas fa-folder-open"></i>'; // Folder icon
                 btn.title = "Select Loaded Texture";
                 btn.onclick = function () {
@@ -3514,6 +3625,8 @@
 
                 group.appendChild(inp);
                 group.appendChild(btn);
+                
+                d.appendChild(lbl);
                 d.appendChild(group);
                 parent.appendChild(d);
             },
@@ -3623,14 +3736,25 @@
             },
 
             addInput: function (parent, label, val, cb, type = 'text') {
-                const d = document.createElement('div');
-                d.className = 'form-control mb-2';
-                d.innerHTML = `<label class="label py-0 text-xs font-bold opacity-60">${label}</label>`;
+               const d = document.createElement('div');
+                // Use Flexbox row layout
+                d.className = 'flex items-center mb-2';
+                
+                // Create fixed-width label (w-32 = 8rem)
+                const lbl = document.createElement('div');
+                lbl.className = ' font-bold opacity-60 w-40 flex-shrink-0 truncate';
+                lbl.innerText = label;
+                lbl.title = label; // Tooltip for long text
+
                 const inp = document.createElement('input');
-                inp.className = 'input input-sm input-bordered';
-                inp.type = type; inp.value = val;
+                // Flex-1 takes remaining width
+                inp.className = 'input input-sm input-bordered flex-shrink w-50 h-7';
+                inp.type = type; 
+                inp.value = val;
                 inp.step = '0.1';
                 inp.onchange = function (e) { cb(e.target.value); this.save(); this.renderTree(); }.bind(this);
+                
+                d.appendChild(lbl);
                 d.appendChild(inp);
                 parent.appendChild(d);
             },
