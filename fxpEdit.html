@@ -317,24 +317,34 @@
                 <i class="fas fa-question text-lg"></i>
             </button>
             <div class="divider divider-horizontal mx-1"></div>
-            <div class="dropdown dropdown-hover">
+            <!-- <div class="dropdown dropdown-hover">
                 <label tabindex="0" class="btn btn-sm btn-ghost"><i class="fas fa-file mr-1"></i> File</label>
                 <ul tabindex="0" class="dropdown-content z-50 menu p-2 shadow bg-base-200 rounded-box w-52">
-                    <li><a onclick="app.newProject()"><i class="fas fa-file-circle-plus"></i> New Project</a></li>
-                    <li><label for="file-upload"><i class="fas fa-folder-open"></i> Open FXP</label></li>
-                    <li><a onclick="saveToFile()"><i class="fas fa-save"></i> Save FXP</a></li>
-                    <li><a onclick="copyToClipboard()"><i class="fas fa-copy"></i> Copy to Clipboard</a></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
                 </ul>
-            </div>
+            </div> -->
+
+            <a onclick="app.newProject()" class="btn btn-sm btn-ghost" title="New empty Project"><i class="fas fa-file-circle-plus"></i> </a>
+           
+            <label  class="btn btn-sm btn-ghost" for="file-upload" title="Load FXP/FXS"><i class="fas fa-folder-open"></i></label>
             <input type="file" id="file-upload" class="hidden" accept=".fxp,.txt,.fxs"
                 onchange="handleFileUpload(this)">
 
-            <label class="btn btn-sm btn-ghost" for="texture-upload" title="Load .png textures referenced in the FXP">
-                <i class="fas fa-images"></i> Load Textures
+            <label class="btn btn-sm btn-ghost" for="texture-upload" title="Load folder with .png textures  referenced in the FXP">
+                <i class="fas fa-images"></i>
             </label>
             <input type="file" id="texture-upload" class="hidden" webkitdirectory directory multiple
                 onchange="handleTextureUpload(this)">
-
+            <div class="divider divider-horizontal mx-1"></div>
+            
+            <a onclick="saveToFile()"  title="Save Project to FXP" class="btn btn-sm btn-ghost">FXP: <i class="fas fa-save"></i></a>
+            <a onclick="copyToClipboard()" title="Save Project to Clipbaord" class="btn btn-sm btn-ghost"><i class="fas fa-copy"></i></a>
+            <div class="divider divider-horizontal mx-1"></div>
+            <a onclick="saveSystemToFile()" title="Save selected System to FXS" class="btn btn-sm btn-ghost">FXS: <i class="fas fa-save"></i></a>
+            <a onclick="copySystemToClipboard()" title="Save selected System to Clipboard" class="btn btn-sm btn-ghost"><i class="fas fa-copy"></i></a>
             <div class="divider divider-horizontal mx-1"></div>
 
             <div class="form-control ml-4">
@@ -2953,14 +2963,31 @@
             },
 
             newProject: function () {
-                this.data = { systems: [] };
-                this.renderTree();
-                this.select(null);
+                // Define the actual reset logic as a reusable function
+                const performReset = function() {
+                    this.data = { systems: [] };
+                    this.renderTree();
+                    this.select(null);
 
-                // FIX: Clear the file input value so selecting the same file triggers 'onchange'
-                const fileInput = document.getElementById('file-upload');
-                if (fileInput) {
-                    fileInput.value = '';
+                    // FIX: Clear the file input value
+                    const fileInput = document.getElementById('file-upload');
+                    if (fileInput) {
+                        fileInput.value = '';
+                    }
+                    showToast("New project started", "success");
+                }.bind(this);
+
+                // Check if there is anything to lose
+                if (this.data && this.data.systems && this.data.systems.length > 0) {
+                    customConfirm("Start a new project? Any unsaved changes will be lost.", "New Project")
+                        .then(function(confirmed) {
+                            if (confirmed) {
+                                performReset();
+                            }
+                        });
+                } else {
+                    // If project is already empty, just reset without nagging
+                    performReset();
                 }
             },
 
@@ -4357,6 +4384,71 @@
             const a = document.createElement('a');
             a.href = url; a.download = 'project.json'; a.click();
         }
+
+function getCurrentSystemContext() {
+    if (!app.selectedId) return null;
+    
+    // app.findItem returns { item, parent, type, root }
+    // 'root' is always the System object, even if an emitter is selected.
+    const found = app.findItem(app.selectedId);
+    return found ? found.root : null;
+}
+
+function copySystemToClipboard() {
+    const sys = getCurrentSystemContext();
+
+    if (!sys) {
+        showToast("No System selected. Please select a System, Emitter, or Info block.", "warning");
+        return;
+    }
+
+    try {
+        // Use the existing modularized stringifier for a single system
+        const text = FXParser.stringifySystem(sys);
+
+        navigator.clipboard.writeText(text).then(function () {
+            showToast(`System "${sys.name}" copied to clipboard!`, "success");
+        }, function (err) {
+            console.error('Async: Could not copy text: ', err);
+            showToast("Failed to copy to clipboard.", "error");
+        });
+    } catch (err) {
+        console.error('Error generating system data: ', err);
+        showToast("Error processing system data.", "error");
+    }
+}
+
+function saveSystemToFile() {
+    const sys = getCurrentSystemContext();
+
+    if (!sys) {
+        showToast("No System selected. Please select a System, Emitter, or Info block.", "warning");
+        return;
+    }
+
+    try {
+        // Use the existing modularized stringifier for a single system
+        const text = FXParser.stringifySystem(sys);
+        
+        // Create filename based on system name
+        const filename = (sys.name || "UnnamedSystem") + ".fxs";
+
+        const blob = new Blob([text], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; 
+        a.download = filename; 
+        a.click();
+        
+        // Clean up
+        URL.revokeObjectURL(url);
+        showToast(`Saved ${filename}`, "success");
+    } catch (err) {
+        console.error("Error saving system file:", err);
+        showToast("Error generating file.", "error");
+    }
+}
+
 
         function handleFileUpload(input) {
             const file = input.files[0];
